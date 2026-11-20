@@ -4,8 +4,8 @@ export default function Footer() {
   return (
     <footer className="border-t border-border bg-background">
       <div className="mx-auto max-w-6xl px-5 py-14">
-        <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
-          <div>
+        <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-5">
+          <div className="md:col-span-2">
             <a href="/" className="flex items-baseline gap-1 text-lg font-semibold tracking-tight">
               <span className="font-display">Broke</span>
               <span className="rounded-md bg-primary px-1.5 py-0.5 text-sm font-semibold text-primary-foreground">
@@ -24,26 +24,44 @@ export default function Footer() {
           </div>
 
           <div>
-            <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Site</h2>
+            <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Calculators</h2>
             <ul className="mt-3 space-y-2 text-sm">
-              {site.nav.map((item) => (
-                <li key={item.href}>
-                  <a href={`/${item.href}`} className="text-muted-foreground hover:text-foreground">
-                    {item.label}
-                  </a>
-                </li>
-              ))}
               <li>
-                <a href="/companies" className="text-muted-foreground hover:text-foreground">
-                  For Companies (Pilots)
+                <a href="/safe-to-spend-calculator" className="text-muted-foreground hover:text-foreground">
+                  Daily Safe-to-Spend
+                </a>
+              </li>
+              <li>
+                <a href="/old-vs-new-tax-regime-calculator" className="text-muted-foreground hover:text-foreground">
+                  Old vs New Tax (FY 2026-27)
+                </a>
+              </li>
+              <li>
+                <a href="/in-hand-salary-calculator" className="text-muted-foreground hover:text-foreground">
+                  In-Hand Salary Calculator
+                </a>
+              </li>
+              <li>
+                <a href="/sip-calculator" className="text-muted-foreground hover:text-foreground">
+                  SIP Calculator & Reverse
+                </a>
+              </li>
+              <li>
+                <a href="/hra-calculator" className="text-muted-foreground hover:text-foreground">
+                  HRA Exemption Calculator
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Legal</h2>
+            <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Site & Legal</h2>
             <ul className="mt-3 space-y-2 text-sm">
+              <li>
+                <a href="/companies" className="text-muted-foreground hover:text-foreground">
+                  For Companies (Pilots)
+                </a>
+              </li>
               <li>
                 <a href="/privacy" className="text-muted-foreground hover:text-foreground">
                   Privacy Policy

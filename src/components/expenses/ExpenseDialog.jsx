@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { deleteExpense, saveExpense } from "@/lib/finance-fns";
+import { trackFirstExpenseLogged } from "@/lib/analytics";
 import { CATEGORIES, PAYMENT_METHODS } from "@/lib/categories";
 import { todayKey } from "@/lib/finance";
 
@@ -81,6 +82,7 @@ export default function ExpenseDialog({ open, onOpenChange, expense, onSaved }) 
 
       const recordId = savedRecord?.id || expense?.id;
       if (recordId && !expense) {
+        trackFirstExpenseLogged(form.category, value);
         toast.success(`Expense of ₹${value} logged`, {
           duration: 7000,
           action: {

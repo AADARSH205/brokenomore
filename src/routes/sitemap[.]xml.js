@@ -3,6 +3,11 @@ import { site } from "@/config/site";
 
 const PATHS = [
   { path: "/", priority: "1.0", freq: "weekly" },
+  { path: "/safe-to-spend-calculator", priority: "0.9", freq: "weekly" },
+  { path: "/old-vs-new-tax-regime-calculator", priority: "0.9", freq: "weekly" },
+  { path: "/in-hand-salary-calculator", priority: "0.9", freq: "weekly" },
+  { path: "/sip-calculator", priority: "0.9", freq: "weekly" },
+  { path: "/hra-calculator", priority: "0.9", freq: "weekly" },
   { path: "/companies", priority: "0.8", freq: "monthly" },
   { path: "/privacy", priority: "0.4", freq: "yearly" },
   { path: "/terms", priority: "0.4", freq: "yearly" },

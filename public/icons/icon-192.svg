@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="42" fill="#0B0F0E"/>
+  <rect x="8" y="8" width="176" height="176" rx="36" fill="none" stroke="#23352D" stroke-width="2"/>
+  <circle cx="96" cy="96" r="64" fill="#14241D"/>
+  <!-- Rupee Symbol + Upward Growth Arrow -->
+  <path d="M72 64h48M72 78h48M72 64v64m0-36c12 0 24-4 24-14s-12-14-24-14m20 28l28 36" 
+        stroke="#10B981" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="132" cy="62" r="8" fill="#F7F4D5"/>
+</svg>

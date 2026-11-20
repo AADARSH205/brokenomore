@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import { site } from "@/config/site";
 import ThemeToggle from "@/components/site/ThemeToggle";
+import LanguageToggle from "@/components/site/LanguageToggle";
 
 export default function Nav({ base = "" }) {
   const [open, setOpen] = useState(false);
@@ -60,6 +61,7 @@ export default function Nav({ base = "" }) {
         </nav>
 
         <div className="flex items-center gap-2">
+          <LanguageToggle />
           <ThemeToggle />
           {!isLoadingAuth && isAuthenticated ? (
             <Link

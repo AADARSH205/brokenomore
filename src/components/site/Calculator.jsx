@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 
 import { computeDailyNumber, formatINR, spendSplit } from "@/lib/money";
+import { useLanguage } from "@/lib/i18n";
+import { trackCalculatorUsed } from "@/lib/analytics";
 
 const FIELDS = [
   { key: "salary", label: "In-hand salary each month", hint: "What actually reaches your bank", min: 5000, max: 300000, step: 500 },
@@ -77,6 +79,7 @@ export default function Calculator({ initialValues, onSync }) {
 
   useEffect(() => {
     if (!touched) return;
+    trackCalculatorUsed("safe_to_spend", { salary: values.salary });
     const timer = setTimeout(() => onSync(values), 400);
     return () => clearTimeout(timer);
   }, [values, touched, onSync]);

@@ -3,11 +3,13 @@ import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { NotFound } from "@/components/NotFound";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/AuthContext";
+import { LanguageProvider } from "@/lib/i18n";
 import { Base44Scripts } from "base44:document";
 import { site } from "@/config/site";
 import appCss from "@/index.css?url";
 
 const themeScript = `try{var t=localStorage.getItem("bnm-theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.classList.add("dark")}}catch(e){}`;
+const swScript = `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})};`;
 
 export const Route = createRootRoute({
   head: () => ({
@@ -21,6 +23,8 @@ export const Route = createRootRoute({
       { property: "og:locale", content: "en_IN" },
     ],
     links: [
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "apple-touch-icon", href: "/icons/icon-192.png" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
@@ -39,8 +43,10 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <AuthProvider>
-      <Outlet />
-      <Toaster />
+      <LanguageProvider>
+        <Outlet />
+        <Toaster />
+      </LanguageProvider>
     </AuthProvider>
   );
 }
@@ -52,6 +58,7 @@ function RootDocument({ children }) {
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: swScript }} />
       </head>
       {/* data-react-root: the builder's preview bridge looks for #root and falls back to this. */}
       <body data-react-root="true">

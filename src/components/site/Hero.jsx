@@ -4,6 +4,8 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, BellRing, Calculator, Globe, Landmark, PiggyBank, Receipt, ShieldCheck, TrendingUp, Wallet } from "lucide-react";
 
 import PhoneDemo from "@/components/site/PhoneDemo";
+import { useLanguage } from "@/lib/i18n";
+import { trackSignupStarted } from "@/lib/analytics";
 
 const BENEFITS = [
   {
@@ -46,6 +48,8 @@ const STRIP = [
 ];
 
 export default function Hero() {
+  const { t, language } = useLanguage();
+
   return (
     <section className="hero-scene" aria-labelledby="hero-heading">
       <div className="hero-ripple" aria-hidden="true" />
@@ -54,27 +58,39 @@ export default function Hero() {
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
           <div className="rise">
             <p className="inline-flex items-center gap-2 rounded-full border border-ink/20 bg-cream/70 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-ink/75">
-              Salary on the 1st. Broke by the 15th? Meet your daily spending guard.
+              {t("hero_badge")}
             </p>
             <h1
               id="hero-heading"
               className="mt-5 max-w-[15em] font-display text-[clamp(2.1rem,6.2vw,4rem)] font-semibold leading-[1.04] tracking-[-0.015em] text-ink"
             >
-              Your Salary. Your Budget.
-              <span className="block text-ink/80">Your Financial Future.</span>
+              {language === "hi" ? (
+                <>
+                  Ek Safe Number Roz Subah.
+                  <span className="block text-ink/80">Month-End Me Kabhi Broke Mat Ho.</span>
+                </>
+              ) : (
+                <>
+                  Your Salary. Your Budget.
+                  <span className="block text-ink/80">Your Financial Future.</span>
+                </>
+              )}
             </h1>
             <p className="mt-5 max-w-[52ch] text-base leading-relaxed text-ink/80 sm:text-lg">
-              Take control of your first salary. A fast web app that calculates one safe-to-spend number every morning after reserving rent, bills, and monthly savings. Android app coming soon.
+              {t("hero_sub")}
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link
                 to="/register"
                 search={{ returnTo: "/dashboard" }}
-                onClick={() => db.analytics.track({ eventName: "hero_cta_start_free" })}
+                onClick={() => {
+                  trackSignupStarted("hero");
+                  db.analytics.track({ eventName: "hero_cta_start_free" });
+                }}
                 className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-ink px-7 text-center text-[15px] font-medium text-cream shadow-md transition-colors hover:bg-ink/90"
               >
-                Start free
+                {t("hero_primary_cta")}
                 <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
               </Link>
               <a
@@ -82,7 +98,7 @@ export default function Hero() {
                 onClick={() => db.analytics.track({ eventName: "hero_cta_calculator" })}
                 className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-ink px-7 text-[15px] font-medium text-ink transition-colors hover:bg-ink hover:text-cream"
               >
-                Try Salary Calculator
+                {t("hero_secondary_cta")}
               </a>
             </div>
 

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
 import { safeReturnTo } from "@/lib/authReturnTo";
+import { trackSignupCompleted, trackSignupStarted } from "@/lib/analytics";
 
 const isAlreadyVerified = (err) => err?.status === 400 && /already verified/i.test(err?.message ?? "");
 
@@ -39,6 +40,7 @@ export function RegisterPage() {
       return;
     }
     setBusy(true);
+    trackSignupStarted("register_page");
     try {
       await db.auth.register({ email, password });
       setStep("otp");
@@ -59,6 +61,7 @@ export function RegisterPage() {
         setMfaChallenge(result);
         return;
       }
+      trackSignupCompleted("email");
       if (result?.access_token) db.auth.setToken(result.access_token);
       window.location.href = returnTo;
     } catch (err) {
