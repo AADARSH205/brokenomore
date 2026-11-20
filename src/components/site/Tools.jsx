@@ -4,12 +4,12 @@ import { ReceiptText, TrendingUp, CreditCard } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { site } from "@/config/site";
-import TaxGuide from "@/components/site/TaxGuide";
+import InteractiveTaxCalculator from "@/components/tax/InteractiveTaxCalculator";
 import InvestTool from "@/components/site/InvestTool";
 import CreditScoreTool from "@/components/site/CreditScoreTool";
 
 const TABS = [
-  { value: "tax", label: "Tax guide", icon: ReceiptText },
+  { value: "tax", label: "Tax planner (FY 2026-27)", icon: ReceiptText },
   { value: "invest", label: "Invest", icon: TrendingUp },
   { value: "credit", label: "Credit score", icon: CreditCard },
 ];
@@ -51,7 +51,7 @@ export default function Tools() {
 
         <div className="mt-6 rounded-3xl border border-border bg-card/60 p-5 sm:p-8">
           <TabsContent value="tax" className="mt-0">
-            <TaxGuide />
+            <InteractiveTaxCalculator />
           </TabsContent>
           <TabsContent value="invest" className="mt-0">
             <InvestTool />

@@ -61,17 +61,34 @@ function Row({ label, left, right, strong }) {
 
 export default function TaxComparison({ comparison, rules }) {
   const { new: newResult, old: oldResult, better, saving } = comparison;
+  const isZeroTax = (better === "new" ? newResult.total : oldResult.total) === 0;
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-border bg-secondary/50 px-4 py-3 text-sm">
-        {better === "equal" ? (
-          <p>Both regimes work out the same on these numbers. Pick either.</p>
-        ) : (
-          <p>
-            With the numbers you entered, the <strong>{better === "new" ? "new" : "old"} regime</strong> is cheaper
-            by <strong>{formatINR(saving)}</strong> a year.
-          </p>
+      {/* RESULT FIRST BANNER */}
+      <div
+        className={cn(
+          "rounded-2xl border p-4 sm:p-5",
+          isZeroTax
+            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-950 dark:text-emerald-100"
+            : better === "equal"
+              ? "border-border bg-secondary/50 text-foreground"
+              : "border-primary/30 bg-primary/10 text-foreground"
+        )}
+      >
+        <p className="font-display text-lg font-semibold tracking-tight sm:text-xl">
+          {comparison.summaryText || (
+            better === "equal"
+              ? `Your tax: ${formatINR(newResult.total)} under New, ${formatINR(oldResult.total)} under Old. Both regimes work out identical.`
+              : `Your tax: ${formatINR(newResult.total)} under New, ${formatINR(oldResult.total)} under Old. Better for you: ${better === "new" ? "New regime" : "Old regime"}, saves ${formatINR(saving)}.`
+          )}
+        </p>
+
+        {isZeroTax && comparison.zeroTaxExplanation && (
+          <div className="mt-3 rounded-xl border border-emerald-500/20 bg-background/80 p-3.5 text-xs leading-relaxed text-foreground">
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">Zero tax explanation: </span>
+            {comparison.zeroTaxExplanation}
+          </div>
         )}
       </div>
 

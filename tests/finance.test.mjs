@@ -10,7 +10,14 @@ import {
   sipInvested,
   totalsByCategory,
 } from "../src/lib/finance.js";
-import { compareRegimes, computeRegime, hraExemption, slabTax } from "../src/lib/tax.js";
+import {
+  compareRegimes,
+  computeRegime,
+  deductionValueBreakdown,
+  estimateInHandSalary,
+  hraExemption,
+  slabTax,
+} from "../src/lib/tax.js";
 
 let passed = 0;
 function test(name, fn) {
@@ -228,6 +235,90 @@ test("zero salary is handled without NaN", () => {
   assert.equal(result.total, 0);
   assert.equal(result.monthly, 0);
   assert.ok(Number.isFinite(result.effectiveRate));
+});
+
+test("FY 2026-27 new regime slabs and 87A rebate produce expected tax", () => {
+  // Test income of ₹10,00,000 gross
+  // Std deduction: 75,000 -> Taxable: 9,25,000
+  // Slabs: 0-4L nil, 4-8L 5% (20,000), 8-9.25L 10% (12,500) -> Base tax = 32,500
+  // Since taxable <= 12L, rebate = 32,500 -> Tax = 0
+  const r10L = computeRegime({ gross_salary: 1000000 }, "new");
+  assert.equal(r10L.taxable, 925000);
+  assert.equal(r10L.total, 0);
+  assert.equal(r10L.isZeroTax, true);
+  assert.ok(r10L.zeroTaxExplanation.includes("Section 87A rebate"));
+
+  // Test income of ₹25,00,000 gross
+  // Std deduction: 75,000 -> Taxable: 24,25,000
+  // Slabs:
+  // 0-4L: 0
+  // 4-8L (4L @ 5%): 20,000
+  // 8-12L (4L @ 10%): 40,000
+  // 12-16L (4L @ 15%): 60,000
+  // 16-20L (4L @ 20%): 80,000
+  // 20-24L (4L @ 25%): 100,000
+  // 24-24.25L (25k @ 30%): 7,500
+  // Base tax: 307,500. Surcharge: 0. Cess (4%): 12,300. Total = 319,800
+  const r25L = computeRegime({ gross_salary: 2500000 }, "new");
+  assert.equal(r25L.taxable, 2425000);
+  assert.equal(r25L.baseTax, 307500);
+  assert.equal(r25L.cess, 12300);
+  assert.equal(r25L.total, 319800);
+});
+
+test("employee voluntary NPS under Section 124(3) caps at 50,000 in old regime", () => {
+  const result = computeRegime(
+    {
+      gross_salary: 1400000,
+      basic_salary: 600000,
+      employee_nps: 75000, // Capped at 50k
+    },
+    "old",
+  );
+  const npsLine = result.lines.find((l) => l.section === "Sec 124(3)");
+  assert.ok(npsLine);
+  assert.equal(npsLine.amount, 50000);
+});
+
+test("deductionValueBreakdown only marks deductions as relevant when old regime wins", () => {
+  // Case A: New regime wins (deductions not enough)
+  const breakdownNewWins = deductionValueBreakdown({
+    gross_salary: 1200000,
+    section_80c: 150000,
+  });
+  assert.equal(breakdownNewWins.oldWins, false);
+  assert.ok(breakdownNewWins.message.includes("New Tax Regime is more beneficial"));
+
+  // Case B: Old regime wins (heavy deductions: HRA, 80C, 80D, 124(3) NPS, 24(b))
+  const breakdownOldWins = deductionValueBreakdown({
+    gross_salary: 1800000,
+    basic_salary: 800000,
+    hra_received: 300000,
+    rent_paid: 300000,
+    metro: true,
+    section_80c: 150000,
+    employee_nps: 50000,
+    section_80d: 50000,
+    home_loan_interest: 200000,
+  });
+  assert.equal(breakdownOldWins.oldWins, true);
+  assert.ok(breakdownOldWins.items.length > 3);
+  assert.ok(breakdownOldWins.totalSaved > 0);
+});
+
+test("in-hand salary estimator calculates monthly take-home and safe-to-spend pre-fill", () => {
+  const est = estimateInHandSalary({
+    annual_ctc: 1200000,
+    basic_salary: 540000,
+  });
+  assert.equal(est.grossAnnual, 1200000);
+  assert.equal(est.monthlyGross, 100000);
+  assert.ok(est.pfMonthly > 0);
+  assert.equal(est.profTaxMonthly, 200);
+  // At 12L gross in New Regime, tax is 0!
+  assert.equal(est.monthlyTds, 0);
+  assert.ok(est.monthlyInHand > 85000 && est.monthlyInHand < 100000);
+  assert.equal(est.safeToSpendSalaryParam, String(est.monthlyInHand));
 });
 
 console.log(`\n${passed} tests passed`);

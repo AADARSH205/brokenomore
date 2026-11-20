@@ -133,10 +133,10 @@ export default function TaxForm({ form, onChange }) {
         />
         <MoneyField
           id="tax-nps-self"
-          label="Your extra NPS (₹)"
+          label="Your NPS — Section 124(3) / 80CCD(1B) (₹)"
           value={form.employee_nps}
           onChange={(value) => set("employee_nps", value)}
-          hint="Section 80CCD(1B), capped at ₹50,000."
+          hint="Voluntary NPS under Section 124(3) (Direct Tax Code) / 80CCD(1B), capped at ₹50,000. Old regime only."
         />
         <MoneyField
           id="tax-nps-employer"

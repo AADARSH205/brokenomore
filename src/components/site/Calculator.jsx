@@ -23,7 +23,20 @@ function NumberField({ field, value, onChange }) {
         <label htmlFor={id} className="text-sm font-medium text-foreground">
           {field.label}
         </label>
-        <span className="text-xs text-muted-foreground">{field.hint}</span>
+        <span className="text-xs text-muted-foreground">
+          {field.hint}
+          {field.key === "salary" && (
+            <>
+              {" · "}
+              <a
+                href="#tools"
+                className="font-medium text-primary underline underline-offset-2 hover:opacity-80"
+              >
+                Estimate from CTC →
+              </a>
+            </>
+          )}
+        </span>
       </div>
       <div className="mt-2 flex items-center gap-4">
         <div className="relative">
