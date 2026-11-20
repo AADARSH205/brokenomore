@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { saveExpense } from "@/lib/finance-fns";
+import { deleteExpense, saveExpense } from "@/lib/finance-fns";
 import { CATEGORIES, PAYMENT_METHODS } from "@/lib/categories";
 import { todayKey } from "@/lib/finance";
 
@@ -29,6 +29,7 @@ export default function ExpenseDialog({ open, onOpenChange, expense, onSaved }) 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const save = useServerFn(saveExpense);
+  const remove = useServerFn(deleteExpense);
 
   useEffect(() => {
     if (!open) return;
@@ -65,7 +66,7 @@ export default function ExpenseDialog({ open, onOpenChange, expense, onSaved }) 
     setSaving(true);
     setError("");
     try {
-      await save({
+      const savedRecord = await save({
         data: {
           id: expense?.id,
           amount: value,
@@ -77,7 +78,28 @@ export default function ExpenseDialog({ open, onOpenChange, expense, onSaved }) 
           is_planned: form.is_planned,
         },
       });
-      toast.success(expense ? "Expense updated" : "Expense added");
+
+      const recordId = savedRecord?.id || expense?.id;
+      if (recordId && !expense) {
+        toast.success(`Expense of ₹${value} logged`, {
+          duration: 7000,
+          action: {
+            label: "Undo",
+            onClick: async () => {
+              try {
+                await remove({ data: { id: recordId } });
+                toast.info(`Undid expense of ₹${value}`);
+                onSaved?.();
+              } catch {
+                toast.error("Could not undo expense.");
+              }
+            },
+          },
+        });
+      } else {
+        toast.success(expense ? "Expense updated" : "Expense added");
+      }
+
       onOpenChange(false);
       onSaved?.();
     } catch (submitError) {

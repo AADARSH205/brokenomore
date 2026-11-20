@@ -9,6 +9,8 @@ import CategoryDonut from "@/components/app/CategoryDonut";
 import UpcomingBills from "@/components/app/UpcomingBills";
 import BudgetProgress from "@/components/app/BudgetProgress";
 import SetupForm from "@/components/app/SetupForm";
+import OnboardingFlow from "@/components/app/OnboardingFlow";
+import MoneyRecapCard from "@/components/app/MoneyRecapCard";
 import ExpenseDialog from "@/components/expenses/ExpenseDialog";
 import useFinanceData from "@/hooks/useFinanceData";
 import { buildInsights, expensesInCycle, expensesInMonth, goalProgress, safeToSpend, salaryCycle, sipTotals, sumExpenses, todayKey } from "@/lib/finance";
@@ -57,15 +59,15 @@ function DashboardPage() {
     );
   }
 
-  if (!profile) {
+  if (!profile || !(Number(profile.monthly_income) > 0)) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 py-4">
         <PageHeader
-          eyebrow="Your dashboard"
-          title="Let's set up your plan"
-          description="One salary number, one savings number, and the day you get paid. Everything else builds from there."
+          eyebrow="Quick Setup"
+          title="Let's find your daily number"
+          description="4 quick steps to ring-fence bills and savings on payday, then reveal your safe-to-spend number."
         />
-        <SetupForm profile={null} onSaved={reload} />
+        <OnboardingFlow onCompleted={reload} />
       </div>
     );
   }
@@ -167,6 +169,16 @@ function DashboardPage() {
           icon={TrendingUp}
         />
       </div>
+
+      <MoneyRecapCard
+        profile={profile}
+        cycle={cycle}
+        expenses={cycleExpenses}
+        budgets={budgets}
+        bills={bills}
+        goals={goals}
+        sips={sips}
+      />
 
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <CategoryDonut expenses={cycleExpenses} title="This cycle by category" />

@@ -113,10 +113,85 @@ export function sipProjection({ monthly, years, annualRate, stepUpPercent = 0 })
   };
 }
 
-export function inflationAdjusted(value, years, inflationPercent) {
+export function inflationAdjusted(value, years, inflationPercent = 6) {
   const rate = clampNumber(inflationPercent, 0, 20) / 100;
   const periods = Math.max(0, Math.floor(clampNumber(years, 0, 50)));
   return Math.round(value / Math.pow(1 + rate, periods));
+}
+
+/**
+ * Reverse SIP calculator:
+ * "I want ₹X in Y years, what monthly SIP?"
+ * Calculates the required initial monthly investment amount.
+ */
+export function reverseSip({ targetWealth, years, annualRate = 12, stepUpPercent = 0 }) {
+  const target = clampNumber(targetWealth, 0, MAX_AMOUNT);
+  const totalYears = Math.floor(clampNumber(years, 0, 50));
+  const rate = clampNumber(annualRate, 0, 30);
+  const stepUp = clampNumber(stepUpPercent, 0, 100);
+
+  if (target <= 0 || totalYears <= 0) {
+    return {
+      monthly: 0,
+      totalInvested: 0,
+      projectedWealth: 0,
+      targetWealth: target,
+      gains: 0,
+    };
+  }
+
+  // Calculate future value for a baseline ₹1,000/month
+  const baseMonthly = 1000;
+  const testProjection = sipProjection({
+    monthly: baseMonthly,
+    years: totalYears,
+    annualRate: rate,
+    stepUpPercent: stepUp,
+  });
+
+  if (testProjection.value <= 0) {
+    return {
+      monthly: 0,
+      totalInvested: 0,
+      projectedWealth: 0,
+      targetWealth: target,
+      gains: 0,
+    };
+  }
+
+  // Linear scaling
+  const scaling = target / testProjection.value;
+  const rawMonthly = baseMonthly * scaling;
+  const monthly = Math.max(100, Math.round(rawMonthly / 50) * 50);
+
+  const finalProjection = sipProjection({
+    monthly,
+    years: totalYears,
+    annualRate: rate,
+    stepUpPercent: stepUp,
+  });
+
+  return {
+    monthly,
+    totalInvested: finalProjection.invested,
+    projectedWealth: finalProjection.value,
+    targetWealth: target,
+    gains: finalProjection.gains,
+  };
+}
+
+/**
+ * Emergency fund target:
+ * 3 to 6 months of mandatory living expenses (rent, bills, food).
+ */
+export function emergencyFundEstimate(monthlyExpenses) {
+  const expense = Math.max(0, Number(monthlyExpenses) || 0);
+  return {
+    monthlyExpenses: expense,
+    threeMonths: expense * 3,
+    sixMonths: expense * 6,
+    recommended: expense * 6,
+  };
 }
 
 export const CREDIT_BANDS = [

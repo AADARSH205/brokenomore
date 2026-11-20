@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2, Wallet } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Plus, Receipt, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import PageHeader from "@/components/app/PageHeader";
 import StatCard from "@/components/app/StatCard";
+import EmptyState from "@/components/app/EmptyState";
 import ConfirmDialog from "@/components/app/ConfirmDialog";
 import BudgetEditor from "@/components/budget/BudgetEditor";
 import BillDialog from "@/components/budget/BillDialog";
@@ -205,9 +206,23 @@ function BudgetPage() {
             {loading ? (
               <div className="mt-3 h-16 animate-pulse rounded-xl bg-secondary" />
             ) : bills.length === 0 ? (
-              <p className="mt-3 rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
-                No bills yet. Add rent, electricity, internet or your phone bill.
-              </p>
+              <div className="mt-3">
+                <EmptyState
+                  icon={Receipt}
+                  title="No bills recorded yet"
+                  body="Rent, electricity, WiFi, or subscriptions: add them once, and BrokeNoMore ring-fences the money on payday so you never accidentally spend it."
+                  action={
+                    <button
+                      type="button"
+                      onClick={() => setBillDialog({ open: true, bill: null })}
+                      className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Add your first bill
+                    </button>
+                  }
+                />
+              </div>
             ) : (
               <ul className="mt-3 divide-y divide-border">
                 {bills.map((bill) => (

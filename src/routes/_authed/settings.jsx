@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, Loader2, LogOut, ShieldCheck, Trash2 } from "lucide-react";
+import { Bell, Clock, Download, Loader2, LogOut, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 import PageHeader from "@/components/app/PageHeader";
 import SetupForm from "@/components/app/SetupForm";
 import ConfirmDialog from "@/components/app/ConfirmDialog";
@@ -23,6 +24,31 @@ function SettingsPage() {
   const clearData = useServerFn(clearMyData);
   const [busy, setBusy] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const [dailyReminder, setDailyReminder] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("brokenomore_daily_reminder") !== "false";
+  });
+  const [reminderTime, setReminderTime] = useState(() => {
+    if (typeof window === "undefined") return "09:00";
+    return localStorage.getItem("brokenomore_reminder_time") || "09:00";
+  });
+
+  const toggleReminder = (enabled) => {
+    setDailyReminder(enabled);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("brokenomore_daily_reminder", enabled ? "true" : "false");
+    }
+    toast.success(enabled ? `Daily reminder set for ${reminderTime}` : "Daily reminder paused");
+  };
+
+  const changeReminderTime = (time) => {
+    setReminderTime(time);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("brokenomore_reminder_time", time);
+    }
+    toast.success(`Reminder time updated to ${time}`);
+  };
 
   const download = async () => {
     setBusy("export");
@@ -85,6 +111,41 @@ function SettingsPage() {
       ) : (
         <SetupForm profile={profile} onSaved={reload} mode="edit" />
       )}
+
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-primary/10 p-2 text-primary">
+              <Bell className="h-4 w-4" />
+            </div>
+            <div>
+              <h2 className="font-display text-base font-semibold tracking-tight">Daily morning reminder</h2>
+              <p className="text-xs text-muted-foreground">
+                Get your safe-to-spend figure every morning without opening social media.
+              </p>
+            </div>
+          </div>
+          <Switch
+            id="settings-reminder"
+            checked={dailyReminder}
+            onCheckedChange={toggleReminder}
+          />
+        </div>
+
+        {dailyReminder && (
+          <div className="mt-4 flex items-center gap-3 rounded-xl border border-border bg-secondary/30 p-3 text-xs">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium text-foreground">Reminder time:</span>
+            <input
+              type="time"
+              value={reminderTime}
+              onChange={(e) => changeReminderTime(e.target.value)}
+              className="h-8 rounded-lg border border-input bg-card px-2 text-xs font-semibold"
+            />
+            <span className="text-muted-foreground">every morning</span>
+          </div>
+        )}
+      </div>
 
       <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
         <h2 className="font-display text-lg font-semibold tracking-tight">Your data</h2>

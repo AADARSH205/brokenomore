@@ -4,8 +4,10 @@ import {
   afterSpends,
   computeDailyNumber,
   creditEstimate,
+  emergencyFundEstimate,
   formatINR,
   inflationAdjusted,
+  reverseSip,
   sipProjection,
   spendSplit,
   toAmount,
@@ -155,6 +157,23 @@ test("missing answers fall back to the first option", () => {
 test("rupees format the Indian way", () => {
   assert.equal(formatINR(150000), "₹1,50,000");
   assert.equal(formatINR(0), "₹0");
+});
+
+test("reverse SIP calculates required monthly SIP to reach target", () => {
+  const result = reverseSip({ targetWealth: 1000000, years: 10, annualRate: 12, stepUpPercent: 0 });
+  assert.ok(result.monthly > 0);
+  assert.ok(result.projectedWealth >= 950000 && result.projectedWealth <= 1050000);
+  assert.ok(result.totalInvested < result.projectedWealth);
+
+  const zero = reverseSip({ targetWealth: 0, years: 5, annualRate: 10 });
+  assert.equal(zero.monthly, 0);
+});
+
+test("emergency fund calculates 3 and 6 months buffer", () => {
+  const fund = emergencyFundEstimate(25000);
+  assert.equal(fund.threeMonths, 75000);
+  assert.equal(fund.sixMonths, 150000);
+  assert.equal(fund.recommended, 150000);
 });
 
 console.log(`\n${passed} tests passed`);

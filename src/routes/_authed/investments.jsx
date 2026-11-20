@@ -9,6 +9,8 @@ import EmptyState from "@/components/app/EmptyState";
 import ConfirmDialog from "@/components/app/ConfirmDialog";
 import SipCalculator from "@/components/sip/SipCalculator";
 import SipDialog from "@/components/sip/SipDialog";
+import BeforeSipChecklist from "@/components/sip/BeforeSipChecklist";
+import FirstSipGuide from "@/components/sip/FirstSipGuide";
 import useFinanceData from "@/hooks/useFinanceData";
 import { deleteSip } from "@/lib/finance-fns";
 import { nextSipDate, sipInvested, sipTotals, todayKey } from "@/lib/finance";
@@ -22,7 +24,7 @@ export const Route = createFileRoute("/_authed/investments")({
 });
 
 function InvestmentsPage() {
-  const { sips, loading, error, reload } = useFinanceData(undefined, ["sips"]);
+  const { sips, bills, goals, profile, loading, error, reload } = useFinanceData(undefined, ["sips", "bills", "goals", "profile"]);
   const [dialog, setDialog] = useState({ open: false, sip: null });
   const [pendingDelete, setPendingDelete] = useState(null);
   const remove = useServerFn(deleteSip);
@@ -34,6 +36,13 @@ function InvestmentsPage() {
     .filter((sip) => sip.status !== "paused")
     .map((sip) => ({ sip, on: nextSipDate(sip, today) }))
     .sort((a, b) => (a.on < b.on ? -1 : 1))[0];
+
+  const totalBills = (bills || []).reduce((acc, b) => acc + (Number(b.amount) || 0), 0);
+  const monthlyIncome = Number(profile?.monthly_income) || 0;
+  const savingsTarget = Number(profile?.monthly_savings_target) || 0;
+  const estimatedExpenses = totalBills > 0 ? totalBills + 15000 : Math.max(12000, monthlyIncome - savingsTarget);
+  const emergencyGoal = (goals || []).find((g) => g.kind === "emergency");
+  const emergencySaved = Number(emergencyGoal?.saved_amount) || 0;
 
   const confirmDelete = async () => {
     if (!pendingDelete) return;
@@ -151,55 +160,9 @@ function InvestmentsPage() {
             <SipCalculator />
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">
-            <h2 className="font-display text-lg font-semibold tracking-tight">The three kinds of mutual fund</h2>
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              {[
-                {
-                  title: "Equity",
-                  body: "Invests mostly in company shares. Highest expected return over long periods, and the biggest falls along the way. Money you need in under five years does not belong here.",
-                },
-                {
-                  title: "Debt",
-                  body: "Lends to governments or companies through bonds. Steadier, lower returns. Fits money you need in one to three years.",
-                },
-                {
-                  title: "Hybrid",
-                  body: "A mix of both. Smoother than pure equity, better than pure debt over long periods. A reasonable single fund for a first investor.",
-                },
-              ].map((item) => (
-                <div key={item.title} className="rounded-xl bg-secondary/60 p-4">
-                  <p className="font-medium">{item.title}</p>
-                  <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{item.body}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              {[
-                {
-                  title: "Risk",
-                  body: "Risk is the chance of selling at a bad time. Time in the market reduces it more than picking the perfect fund does.",
-                },
-                {
-                  title: "Diversification",
-                  body: "One index fund already holds hundreds of companies. Adding five more funds rarely spreads risk further; it just adds work.",
-                },
-                {
-                  title: "Long term",
-                  body: "SIPs work because they buy more units when prices fall. Ten years is a reasonable minimum for equity.",
-                },
-              ].map((item) => (
-                <div key={item.title} className="rounded-xl bg-secondary/60 p-4">
-                  <p className="font-medium">{item.title}</p>
-                  <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{item.body}</p>
-                </div>
-              ))}
-            </div>
-            <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
-              This is education, not investment advice. BrokeNoMore does not recommend funds, predict returns or
-              execute orders. For advice about your own money, talk to a SEBI-registered investment adviser.
-            </p>
-          </div>
+          <BeforeSipChecklist monthlyExpenses={estimatedExpenses} emergencySaved={emergencySaved} />
+
+          <FirstSipGuide />
         </>
       )}
 
