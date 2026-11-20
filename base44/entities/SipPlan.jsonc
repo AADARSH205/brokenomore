@@ -1,0 +1,89 @@
+{
+  "name": "SipPlan",
+  "type": "object",
+  "properties": {
+    "fund_name": {
+      "type": "string",
+      "description": "Name of the fund or scheme the person invests in"
+    },
+    "monthly_amount": {
+      "type": "number",
+      "description": "Amount invested every month, in rupees"
+    },
+    "start_date": {
+      "type": "string",
+      "description": "First instalment date, YYYY-MM-DD"
+    },
+    "sip_day": {
+      "type": "integer",
+      "description": "Day of the month the instalment goes out"
+    },
+    "goal": {
+      "type": "string",
+      "description": "What this SIP is meant to fund"
+    },
+    "duration_years": {
+      "type": "number",
+      "description": "How long the person plans to keep investing"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused"
+      ],
+      "enumColors": [
+        "green",
+        "gray"
+      ],
+      "default": "active",
+      "description": "Whether the SIP is running"
+    }
+  },
+  "required": [
+    "fund_name",
+    "monthly_amount",
+    "start_date"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

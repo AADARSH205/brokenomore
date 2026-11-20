@@ -1,0 +1,77 @@
+{
+  "name": "FinanceProfile",
+  "type": "object",
+  "properties": {
+    "display_name": {
+      "type": "string",
+      "description": "Name shown in the dashboard greeting"
+    },
+    "monthly_income": {
+      "type": "number",
+      "description": "Take-home salary received each month, in rupees"
+    },
+    "extra_income": {
+      "type": "number",
+      "description": "Other monthly income, such as freelance work or rent received"
+    },
+    "salary_day": {
+      "type": "integer",
+      "description": "Day of the month the salary lands, 1 to 31"
+    },
+    "monthly_savings_target": {
+      "type": "number",
+      "description": "Amount the person commits to saving every month"
+    },
+    "safety_buffer": {
+      "type": "number",
+      "description": "Money deliberately kept unspent, subtracted before the daily number"
+    },
+    "onboarded": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the person has completed the first setup"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

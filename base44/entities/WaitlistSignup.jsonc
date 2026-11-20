@@ -1,0 +1,75 @@
+{
+  "name": "WaitlistSignup",
+  "type": "object",
+  "properties": {
+    "contact": {
+      "type": "string",
+      "description": "Email address, or a +91 mobile number stored as +919876543210"
+    },
+    "contact_type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "mobile"
+      ],
+      "enumColors": [
+        "blue",
+        "purple"
+      ],
+      "description": "Which kind of contact this is"
+    },
+    "source": {
+      "type": "string",
+      "description": "Which form or section the signup came from"
+    },
+    "consent": {
+      "type": "boolean",
+      "description": "The person agreed to be emailed about the Android beta"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "invited",
+        "removed"
+      ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "gray"
+      ],
+      "default": "new",
+      "description": "Where this signup is in the beta rollout"
+    }
+  },
+  "required": [
+    "contact",
+    "contact_type",
+    "consent"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

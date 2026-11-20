@@ -1,0 +1,129 @@
+{
+  "name": "Expense",
+  "type": "object",
+  "properties": {
+    "amount": {
+      "type": "number",
+      "description": "Amount spent in rupees"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "food",
+        "groceries",
+        "rent",
+        "transport",
+        "shopping",
+        "entertainment",
+        "travel",
+        "bills",
+        "medical",
+        "education",
+        "emi",
+        "subscriptions",
+        "other"
+      ],
+      "enumColors": [
+        "yellow",
+        "yellow",
+        "purple",
+        "blue",
+        "pink",
+        "red",
+        "green",
+        "gray",
+        "red",
+        "blue",
+        "purple",
+        "purple",
+        "gray"
+      ],
+      "description": "Spending category"
+    },
+    "date": {
+      "type": "string",
+      "description": "Day the money left the account, YYYY-MM-DD"
+    },
+    "description": {
+      "type": "string",
+      "description": "What the money was for"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "upi",
+        "card",
+        "cash",
+        "netbanking",
+        "autopay",
+        "other"
+      ],
+      "enumColors": [
+        "green",
+        "blue",
+        "gray",
+        "purple",
+        "yellow",
+        "gray"
+      ],
+      "default": "upi",
+      "description": "How it was paid"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this expense repeats every month"
+    },
+    "is_planned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a planned expense recorded ahead of the date"
+    }
+  },
+  "required": [
+    "amount",
+    "category",
+    "date"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

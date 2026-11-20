@@ -1,0 +1,71 @@
+{
+  "name": "BillPayment",
+  "type": "object",
+  "properties": {
+    "bill_id": {
+      "type": "string",
+      "description": "The RecurringBill this payment settles"
+    },
+    "month": {
+      "type": "string",
+      "description": "Month being paid for, YYYY-MM"
+    },
+    "paid_on": {
+      "type": "string",
+      "description": "Day the bill was paid, YYYY-MM-DD"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount actually paid, in rupees"
+    },
+    "expense_id": {
+      "type": "string",
+      "description": "The expense record created for this payment, so it is counted once"
+    }
+  },
+  "required": [
+    "bill_id",
+    "month"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

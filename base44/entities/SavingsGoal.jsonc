@@ -1,0 +1,91 @@
+{
+  "name": "SavingsGoal",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "What the person is saving for"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "emergency",
+        "laptop",
+        "vehicle",
+        "vacation",
+        "education",
+        "house",
+        "other"
+      ],
+      "enumColors": [
+        "green",
+        "blue",
+        "purple",
+        "yellow",
+        "blue",
+        "pink",
+        "gray"
+      ],
+      "default": "other",
+      "description": "Type of goal, used for the icon and guidance"
+    },
+    "target_amount": {
+      "type": "number",
+      "description": "Amount needed to complete the goal"
+    },
+    "saved_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Amount already set aside"
+    },
+    "target_date": {
+      "type": "string",
+      "description": "Date the person wants to reach the goal, YYYY-MM-DD"
+    }
+  },
+  "required": [
+    "name",
+    "target_amount"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

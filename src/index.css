@@ -1,0 +1,238 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Warm cream base, deep green ink, olive accent */
+    --background: 55 68% 90%;
+    --foreground: 157 67% 12%;
+    --card: 52 62% 94%;
+    --card-foreground: 157 67% 12%;
+    --popover: 52 62% 95%;
+    --popover-foreground: 157 67% 12%;
+    --primary: 157 67% 12%;
+    --primary-foreground: 55 68% 94%;
+    --secondary: 52 34% 85%;
+    --secondary-foreground: 157 55% 14%;
+    --muted: 52 34% 85%;
+    --muted-foreground: 157 20% 28%;
+    --accent: 80 27% 47%;
+    --accent-foreground: 157 60% 10%;
+    --destructive: 8 62% 38%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 157 18% 76%;
+    --input: 157 18% 72%;
+    --ring: 80 30% 38%;
+    --amber: 34 74% 34%;
+    --amber-foreground: 42 90% 96%;
+    --olive: 80 27% 47%;
+    --olive-foreground: 157 60% 10%;
+    --olive-soft: 78 32% 82%;
+    --ink: 157 67% 12%;
+    --cream: 55 68% 90%;
+    --chart-1: 157 67% 20%;
+    --chart-2: 80 27% 47%;
+    --chart-3: 34 74% 44%;
+    --chart-4: 55 40% 70%;
+    --chart-5: 157 30% 45%;
+    /* Money signals: green means you are on track, amber means look at this */
+    --positive: 152 46% 28%;
+    --positive-soft: 150 38% 88%;
+    --positive-foreground: 0 0% 100%;
+    --warning: 30 78% 36%;
+    --warning-soft: 40 80% 89%;
+    --warning-foreground: 40 90% 97%;
+    --radius: 1rem;
+    --font-display: "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
+    --font-heading: "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sidebar-background: 52 40% 88%;
+    --sidebar-foreground: 157 40% 18%;
+    --sidebar-primary: 157 67% 12%;
+    --sidebar-primary-foreground: 55 68% 94%;
+    --sidebar-accent: 52 34% 82%;
+    --sidebar-accent-foreground: 157 55% 14%;
+    --sidebar-border: 157 18% 76%;
+    --sidebar-ring: 80 27% 47%;
+  }
+
+  .dark {
+    --background: 158 40% 7%;
+    --foreground: 55 42% 93%;
+    --card: 158 32% 10%;
+    --card-foreground: 55 42% 94%;
+    --popover: 158 32% 10%;
+    --popover-foreground: 55 42% 94%;
+    --primary: 55 55% 88%;
+    --primary-foreground: 158 45% 9%;
+    --secondary: 158 24% 16%;
+    --secondary-foreground: 55 35% 92%;
+    --muted: 158 22% 15%;
+    --muted-foreground: 55 18% 76%;
+    --accent: 80 32% 60%;
+    --accent-foreground: 158 45% 9%;
+    --destructive: 8 65% 62%;
+    --destructive-foreground: 158 45% 9%;
+    --border: 158 20% 22%;
+    --input: 158 20% 26%;
+    --ring: 80 35% 62%;
+    --amber: 38 78% 64%;
+    --amber-foreground: 158 45% 9%;
+    --olive: 80 30% 58%;
+    --olive-foreground: 158 45% 9%;
+    --olive-soft: 80 22% 22%;
+    --ink: 55 42% 93%;
+    --cream: 158 40% 7%;
+    --chart-1: 55 45% 85%;
+    --chart-2: 80 32% 58%;
+    --chart-3: 38 78% 62%;
+    --chart-4: 158 22% 40%;
+    --chart-5: 158 35% 65%;
+    --positive: 150 42% 60%;
+    --positive-soft: 155 28% 18%;
+    --positive-foreground: 158 45% 9%;
+    --warning: 38 82% 62%;
+    --warning-soft: 33 36% 20%;
+    --warning-foreground: 158 45% 9%;
+    --sidebar-background: 158 32% 10%;
+    --sidebar-foreground: 55 35% 92%;
+    --sidebar-primary: 55 55% 88%;
+    --sidebar-primary-foreground: 158 45% 9%;
+    --sidebar-accent: 158 24% 16%;
+    --sidebar-accent-foreground: 55 35% 92%;
+    --sidebar-border: 158 20% 22%;
+    --sidebar-ring: 80 35% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    font-synthesis-weight: none;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+    font-variation-settings: "SOFT" 40, "WONK" 1;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: hsl(var(--olive) / 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------- Hero scene: cream -> olive -> ink with a tilted ripple vortex ---------- */
+.hero-scene {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(22% 16% at 50% 58%, rgba(255, 253, 214, 0.85) 0%, rgba(247, 244, 213, 0.28) 55%, rgba(247, 244, 213, 0) 100%),
+    linear-gradient(
+      180deg,
+      #f7f4d5 0%,
+      #f4f2d0 26%,
+      #ecebc4 44%,
+      #dcdcb6 56%,
+      #c2c8a3 66%,
+      #a3b189 74%,
+      #839958 82%,
+      #54703f 90%,
+      #23432c 96%,
+      #0a3323 100%
+    );
+}
+
+.hero-ripple {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 150%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) perspective(680px) rotateX(61deg);
+  transform-origin: 50% 50%;
+  -webkit-mask-image: radial-gradient(closest-side, #000 56%, rgba(0, 0, 0, 0) 100%);
+  mask-image: radial-gradient(closest-side, #000 56%, rgba(0, 0, 0, 0) 100%);
+  pointer-events: none;
+}
+
+.hero-ripple::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  background: repeating-radial-gradient(
+    circle at 50% 50%,
+    rgba(247, 244, 213, 0) 0 12.5px,
+    rgba(247, 244, 213, 0.5) 13px 14px,
+    rgba(247, 244, 213, 0) 14.5px 15px
+  );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-ripple::before {
+    animation: ripple-breathe 7s ease-in-out infinite;
+  }
+  .rise {
+    animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}
+
+@keyframes ripple-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* thin, calm scrollbar for the tool panels */
+.thin-scroll {
+  scrollbar-width: thin;
+}

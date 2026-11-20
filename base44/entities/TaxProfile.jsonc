@@ -1,0 +1,120 @@
+{
+  "name": "TaxProfile",
+  "type": "object",
+  "properties": {
+    "financial_year": {
+      "type": "string",
+      "default": "2026-27",
+      "description": "Financial year the figures belong to"
+    },
+    "gross_salary": {
+      "type": "number",
+      "description": "Annual gross salary before any deduction"
+    },
+    "bonus": {
+      "type": "number",
+      "description": "Annual bonus or variable pay, taxed as salary"
+    },
+    "other_income": {
+      "type": "number",
+      "description": "Annual income outside salary, such as interest or rent received"
+    },
+    "basic_salary": {
+      "type": "number",
+      "description": "Annual basic salary, used for HRA and NPS limits"
+    },
+    "hra_received": {
+      "type": "number",
+      "description": "Annual HRA received as part of salary"
+    },
+    "rent_paid": {
+      "type": "number",
+      "description": "Annual rent actually paid"
+    },
+    "metro": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the person lives in Delhi, Mumbai, Kolkata or Chennai"
+    },
+    "employee_pf": {
+      "type": "number",
+      "description": "Annual employee PF contribution, part of the 80C limit"
+    },
+    "other_80c": {
+      "type": "number",
+      "description": "Other 80C investments such as ELSS, PPF or life insurance"
+    },
+    "employee_nps": {
+      "type": "number",
+      "description": "Additional NPS contribution under 80CCD(1B)"
+    },
+    "employer_nps": {
+      "type": "number",
+      "description": "Employer NPS contribution under 80CCD(2)"
+    },
+    "health_insurance": {
+      "type": "number",
+      "description": "Annual health insurance premium under 80D"
+    },
+    "home_loan_interest": {
+      "type": "number",
+      "description": "Annual home loan interest under section 24(b)"
+    },
+    "other_deductions": {
+      "type": "number",
+      "description": "Any other eligible deduction, such as 80TTA or 80E"
+    },
+    "checklist": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tax-saving checklist items the person has ticked off"
+    }
+  },
+  "required": [
+    "financial_year",
+    "gross_salary"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

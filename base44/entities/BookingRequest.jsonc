@@ -1,0 +1,87 @@
+{
+  "name": "BookingRequest",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name as typed by the person booking"
+    },
+    "contact": {
+      "type": "string",
+      "description": "Email address, or a +91 mobile number stored as +919876543210"
+    },
+    "contact_type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "mobile"
+      ],
+      "enumColors": [
+        "blue",
+        "purple"
+      ],
+      "description": "Which kind of contact this is"
+    },
+    "date": {
+      "type": "string",
+      "description": "Preferred day, YYYY-MM-DD in India time"
+    },
+    "slot": {
+      "type": "string",
+      "description": "Time slot label, for example 11:00 AM"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Anything the person chose to add"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "confirmed",
+        "done",
+        "cancelled"
+      ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "blue",
+        "gray"
+      ],
+      "default": "new",
+      "description": "Where this booking is in the pipeline"
+    }
+  },
+  "required": [
+    "name",
+    "contact",
+    "contact_type",
+    "date",
+    "slot"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

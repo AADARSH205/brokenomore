@@ -1,0 +1,83 @@
+{
+  "name": "PilotRequest",
+  "type": "object",
+  "properties": {
+    "company": {
+      "type": "string",
+      "description": "Company name as typed by the requester"
+    },
+    "work_email": {
+      "type": "string",
+      "description": "Lower-cased work email address"
+    },
+    "team_size": {
+      "type": "string",
+      "enum": [
+        "1-10",
+        "11-50",
+        "51-200",
+        "201-1000",
+        "1000+"
+      ],
+      "enumColors": [
+        "gray",
+        "blue",
+        "purple",
+        "yellow",
+        "green"
+      ],
+      "description": "How many people the pilot would cover"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Anything the requester chose to add"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "pilot",
+        "closed"
+      ],
+      "enumColors": [
+        "green",
+        "yellow",
+        "blue",
+        "gray"
+      ],
+      "default": "new",
+      "description": "Where this request is in the pipeline"
+    }
+  },
+  "required": [
+    "company",
+    "work_email",
+    "team_size"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
