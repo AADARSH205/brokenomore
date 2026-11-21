@@ -1,7 +1,34 @@
--- BrokeNoMore: Seed 100 Realistic Users into Supabase Auth & Profiles
--- Copy and paste this into Supabase SQL Editor and click RUN.
--- All 100 users can log in with password: Password@123
+-- ==============================================================================
+-- BrokeNoMore: Seed 100 Users directly into Supabase Authentication -> Users
+-- Run this in Supabase SQL Editor:
+-- https://supabase.com/dashboard/project/uqnqqzldwhybdsaceafq/sql/new
+--
+-- Features:
+-- 1. Inserts into auth.users (Appears directly in Authentication -> Users table)
+-- 2. Inserts into auth.identities with provider_id (Allows login with email + password)
+-- 3. Inserts into public.profiles (Contains salary, savings goal, safe-to-spend)
+-- 4. Password for all 100 accounts: Password@123
+-- ==============================================================================
 
+-- 1. Ensure pgcrypto extension and search path are set
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+SET search_path = public, extensions, auth;
+
+-- 2. Ensure public.profiles table exists
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id uuid references auth.users on delete cascade primary key,
+  email text,
+  full_name text,
+  salary numeric default 50000,
+  salary_day integer default 1,
+  fixed_bills numeric default 20000,
+  savings_goal numeric default 10000,
+  daily_safe_spend numeric default 0,
+  created_at timestamptz default timezone('utc'::text, now()) not null,
+  updated_at timestamptz default timezone('utc'::text, now()) not null
+);
+
+-- 3. Loop and generate 100 realistic users
 DO $$
 DECLARE
   i INTEGER;
@@ -16,7 +43,15 @@ DECLARE
   user_bills NUMERIC;
   user_goal NUMERIC;
   user_daily NUMERIC;
+  encrypted_pw TEXT;
 BEGIN
+  -- Generate bcrypt hash for Password@123
+  BEGIN
+    encrypted_pw := crypt('Password@123', gen_salt('bf'));
+  EXCEPTION WHEN OTHERS THEN
+    encrypted_pw := extensions.crypt('Password@123', extensions.gen_salt('bf'));
+  END;
+
   FOR i IN 1..100 LOOP
     new_uid := gen_random_uuid();
     fn := first_names[1 + floor(random() * array_length(first_names, 1))::int];
@@ -29,37 +64,69 @@ BEGIN
     user_goal   := 5000 + (floor(random() * 5) * 2000);    -- ₹5,000 to ₹13,000
     user_daily  := round((user_salary - user_bills - user_goal) / 30); -- Safe to spend
 
-    -- 1. Insert into Supabase Auth table (pre-confirmed with password 'Password@123')
+    -- 1. Insert into auth.users (Authentication -> Users)
     INSERT INTO auth.users (
-      id,
       instance_id,
+      id,
       aud,
       role,
       email,
       encrypted_password,
       email_confirmed_at,
+      recovery_sent_at,
+      last_sign_in_at,
       raw_app_meta_data,
       raw_user_meta_data,
       created_at,
       updated_at,
-      last_sign_in_at
+      confirmation_token,
+      email_change,
+      email_change_token_new,
+      recovery_token
     ) VALUES (
-      new_uid,
       '00000000-0000-0000-0000-000000000000',
+      new_uid,
       'authenticated',
       'authenticated',
       user_email,
-      crypt('Password@123', gen_salt('bf')),
+      encrypted_pw,
       now() - (interval '1 day' * (i % 25)),
+      now(),
+      now() - (interval '1 hour' * (i % 48)),
       '{"provider":"email","providers":["email"]}'::jsonb,
       jsonb_build_object('full_name', user_name),
       now() - (interval '1 day' * (i % 30)),
       now(),
-      now() - (interval '1 hour' * (i % 48))
+      '',
+      '',
+      '',
+      ''
     )
-    ON CONFLICT (email) DO NOTHING;
+    ON CONFLICT DO NOTHING;
 
-    -- 2. Insert into BrokeNoMore Profiles table
+    -- 2. Insert into auth.identities (Required by Supabase for email login)
+    INSERT INTO auth.identities (
+      id,
+      user_id,
+      identity_data,
+      provider,
+      provider_id,
+      last_sign_in_at,
+      created_at,
+      updated_at
+    ) VALUES (
+      gen_random_uuid(),
+      new_uid,
+      format('{"sub": "%s", "email": "%s"}', new_uid::text, user_email)::jsonb,
+      'email',
+      new_uid::text,
+      now(),
+      now(),
+      now()
+    )
+    ON CONFLICT DO NOTHING;
+
+    -- 3. Insert into public.profiles (Profile & Salary details)
     INSERT INTO public.profiles (
       id,
       email,
@@ -68,7 +135,9 @@ BEGIN
       salary_day,
       fixed_bills,
       savings_goal,
-      daily_safe_spend
+      daily_safe_spend,
+      created_at,
+      updated_at
     ) VALUES (
       new_uid,
       user_email,
@@ -77,12 +146,14 @@ BEGIN
       1 + (floor(random() * 5))::int,
       user_bills,
       user_goal,
-      user_daily
+      user_daily,
+      now() - (interval '1 day' * (i % 30)),
+      now()
     )
-    ON CONFLICT (id) DO UPDATE SET
-      full_name = EXCLUDED.full_name,
-      salary = EXCLUDED.salary,
-      daily_safe_spend = EXCLUDED.daily_safe_spend;
+    ON CONFLICT DO NOTHING;
 
   END LOOP;
 END $$;
+
+-- 4. Verification Query: Returns the total count of users in Authentication
+SELECT count(*) AS total_auth_users FROM auth.users;
