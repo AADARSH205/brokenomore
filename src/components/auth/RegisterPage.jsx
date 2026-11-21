@@ -43,20 +43,21 @@ export function RegisterPage() {
     setBusy(true);
     trackSignupStarted("register_page");
     try {
-      if (isSupabaseConfigured) {
-        const { user, session } = await supabaseSignUp(email, password);
-        trackSignupCompleted("supabase_email");
-        if (session) {
-          toast.success("Account created successfully!");
-          window.location.href = returnTo;
-        } else {
-          toast.success("Account created! Please check your email to confirm your account.");
-          window.location.href = `/login?returnTo=${encodeURIComponent(returnTo)}`;
-        }
-        return;
+      if (!isSupabaseConfigured) {
+        throw new Error(
+          "Supabase keys are missing. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your Vercel Project Settings -> Environment Variables, then Redeploy."
+        );
       }
-      await db.auth.register({ email, password });
-      setStep("otp");
+      const { user, session } = await supabaseSignUp(email, password);
+      trackSignupCompleted("supabase_email");
+      if (session) {
+        toast.success("Account created successfully!");
+        window.location.href = returnTo;
+      } else {
+        toast.success("Account created! Please check your email to confirm your account.");
+        window.location.href = `/login?returnTo=${encodeURIComponent(returnTo)}`;
+      }
+      return;
     } catch (err) {
       setError(err.message || "Registration failed");
     } finally {

@@ -25,18 +25,14 @@ export function LoginPage() {
     setError("");
     setBusy(true);
     try {
-      if (isSupabaseConfigured) {
-        await supabaseSignIn(email, password);
-        window.location.href = returnTo;
-        return;
+      if (!isSupabaseConfigured) {
+        throw new Error(
+          "Supabase keys are missing. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your Vercel Project Settings -> Environment Variables, then Redeploy."
+        );
       }
-      const result = await loginWithMfa(email, password);
-      if (result.mfa_required) {
-        setMfaChallenge(result);
-        return;
-      }
-      // A hard redirect: the app re-initializes with the new session.
+      await supabaseSignIn(email, password);
       window.location.href = returnTo;
+      return;
     } catch (err) {
       setError(err.message || "Invalid email or password");
       setBusy(false);

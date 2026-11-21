@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { GoogleIcon } from "./GoogleIcon";
 import { signInWithProvider } from "@/lib/authMfaFlow";
 import { returnToSearch } from "@/lib/authReturnTo";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
 // Small pieces the auth pages share.
 
@@ -32,12 +33,32 @@ export function SubmitButton({ busy, busyLabel, children, ...props }) {
 }
 
 export function GoogleButton({ returnTo, onError }) {
+  const handleGoogle = async () => {
+    try {
+      if (isSupabaseConfigured && supabase) {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: window.location.origin + (returnTo || "/dashboard"),
+          },
+        });
+        if (error) {
+          throw new Error("Google login is not enabled in Supabase yet. Please sign in with Email & Password below, or enable Google under Supabase -> Authentication -> Providers.");
+        }
+        return;
+      }
+      await signInWithProvider("google", returnTo);
+    } catch (err) {
+      onError(err.message || "Please use email & password to sign in.");
+    }
+  };
+
   return (
     <Button
       type="button"
       variant="outline"
       className="mb-6 h-12 w-full text-sm font-medium"
-      onClick={() => signInWithProvider("google", returnTo).catch((err) => onError(err.message || "Unable to sign in with Google"))}
+      onClick={handleGoogle}
     >
       <GoogleIcon className="mr-2 h-5 w-5" />
       Continue with Google
