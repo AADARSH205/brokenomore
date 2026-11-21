@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/lib/i18n";
 import { Base44Scripts } from "base44:document";
 import { site } from "@/config/site";
 import appCss from "@/index.css?url";
+import { Analytics } from "@vercel/analytics/react";
 
 const themeScript = `try{var t=localStorage.getItem("bnm-theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.classList.add("dark")}}catch(e){}`;
 const swScript = `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})};`;
@@ -65,6 +66,7 @@ function RootDocument({ children }) {
         {children}
         <Base44Scripts />
         <Scripts />
+        <Analytics />
       </body>
     </html>
   );
