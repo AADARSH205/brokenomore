@@ -1,4 +1,4 @@
--- BrokeNoMore Database Schema for Supabase
+-- BrokeNoMore Database Schema for Supabase (Idempotent & Safe to Re-run)
 -- Copy and paste this into Supabase SQL Editor (https://supabase.com/dashboard/project/_/sql)
 
 -- 1. Profiles Table (linked to Supabase Auth)
@@ -44,57 +44,71 @@ alter table public.profiles enable row level security;
 alter table public.expenses enable row level security;
 alter table public.savings_goals enable row level security;
 
--- 5. RLS Policies (Users can only access their own data)
+-- 5. Profiles RLS Policies (Safely drop if exists, then create)
+drop policy if exists "Users can view own profile" on public.profiles;
 create policy "Users can view own profile"
   on public.profiles for select
   using (auth.uid() = id);
 
+drop policy if exists "Users can update own profile" on public.profiles;
 create policy "Users can update own profile"
   on public.profiles for update
   using (auth.uid() = id);
 
+drop policy if exists "Users can insert own profile" on public.profiles;
 create policy "Users can insert own profile"
   on public.profiles for insert
   with check (auth.uid() = id);
 
+-- 6. Expenses RLS Policies
+drop policy if exists "Users can view own expenses" on public.expenses;
 create policy "Users can view own expenses"
   on public.expenses for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own expenses" on public.expenses;
 create policy "Users can insert own expenses"
   on public.expenses for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update own expenses" on public.expenses;
 create policy "Users can update own expenses"
   on public.expenses for update
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can delete own expenses" on public.expenses;
 create policy "Users can delete own expenses"
   on public.expenses for delete
   using (auth.uid() = user_id);
 
+-- 7. Savings Goals RLS Policies
+drop policy if exists "Users can view own goals" on public.savings_goals;
 create policy "Users can view own goals"
   on public.savings_goals for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own goals" on public.savings_goals;
 create policy "Users can insert own goals"
   on public.savings_goals for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update own goals" on public.savings_goals;
 create policy "Users can update own goals"
   on public.savings_goals for update
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can delete own goals" on public.savings_goals;
 create policy "Users can delete own goals"
   on public.savings_goals for delete
   using (auth.uid() = user_id);
 
--- 6. Trigger: automatically create profile row when user signs up in Auth
+-- 8. Trigger: automatically create profile row when user signs up in Auth
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
   insert into public.profiles (id, email)
-  values (new.id, new.email);
+  values (new.id, new.email)
+  on conflict (id) do nothing;
   return new;
 end;
 $$ language plpgsql security definer;
