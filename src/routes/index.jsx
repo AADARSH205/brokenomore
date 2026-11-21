@@ -64,13 +64,13 @@ export const Route = createFileRoute("/")({
         {
           name: "description",
           content:
-            "A free web app for first-job salaried people in India. Track your salary, calculate your daily safe-to-spend figure, plan taxes, and start your first SIP. Android app coming soon.",
+            "Free financial tools for India's first-job salaried professionals: daily safe-to-spend number, expense tracker, tax calculator, SIP planner, credit score guide, and more.",
         },
         { property: "og:title", content: "BrokeNoMore — One safe-to-spend number every morning" },
         {
           property: "og:description",
           content:
-            "A free web app for your first salary. Reserve rent, bills and savings on payday, then spend freely with one calm number. Android app coming soon.",
+            "Free financial tools for India's first-job salaried professionals. Calculate your daily safe-to-spend number, plan taxes (80D, 80C), track investments, and build credit.",
         },
         { property: "og:type", content: "website" },
         { property: "og:url", content: site.url },
@@ -84,7 +84,7 @@ export const Route = createFileRoute("/")({
         { name: "twitter:title", content: "BrokeNoMore — One safe-to-spend number every morning" },
         {
           name: "twitter:description",
-          content: "Reserve rent, bills and savings on payday. Spend today without mental maths.",
+          content: "Calculate save-to-spend numbers, tax savings, SIP investments, credit scores, and emergency funds. Free financial tools for India's first-job professionals.",
         },
         {
           name: "twitter:image",

@@ -6,32 +6,49 @@ The Android app is in beta; the site collects the waitlist and pilot requests.
 ## What is here
 
 - One scrolling page: hero with an interactive phone demo, daily-number calculator, how it works,
-  why people open it daily, three free tools, companies, pricing, FAQ, final waitlist.
+  why people open it daily, 8+ free tools, companies, pricing, FAQ, final waitlist.
 - Separate pages: `/privacy`, `/terms`, `/grievance`.
 - Waitlist and pilot forms write to the app's database and send a confirmation email. No form is a mock.
 - SEO: per-page title and description, Open Graph and Twitter cards, JSON-LD (Organization + FAQPage),
   `/sitemap.xml`, `/robots.txt`.
+
+## Free Tools Available
+
+1. **Daily Safe-to-Spend Number** - One calm number every morning after reserving rent, bills and savings
+2. **Expense Tracker** - Track where every rupee goes with 1-tap categorization
+3. **Tax Savings Calculator** - Compare Old vs New tax regimes, calculate 80D, 80C, 80CCD(1B) deductions
+4. **SIP Investment Planner** - Project wealth growth, reverse SIP for target goals
+5. **Take Home Salary Tool** - Calculate post-tax income after EPF, PT, ESIC and tax deductions
+6. **Credit Score Guide** - Understand CIBIL factors, get improvement tips, find best cards for you
+7. **Emergency Fund Calculator** - Calculate 3-6 months expense buffer for financial security
+8. **Investment Options Explorer** - Compare FD, PPF, ELSS, NPS, equity with expected returns and risks
 
 ## Stack note
 
 The brief asked for Next.js + TypeScript + Supabase + Resend on Vercel. This app runs on Base44's
 TanStack Start runtime instead: same React + Tailwind + shadcn/ui frontend, with Base44 providing the
 database, the server functions (the equivalent of server actions) and transactional email. Nothing needs
-to be wired up by hand, and there are no third-party keys to manage. See `.env.example`.
+to be wired up by hand, and there are no third-party keys to manage.
 
 ## Where things live
 
-- `src/config/site.js` — every editable detail: contact email, socials, grievance officer (TODO
-  placeholders), the "as of" dates, the sample figures shared by the hero and the calculator, FAQ copy,
-  pricing.
-- `src/data/tax-deductions.js` — the tax guide's single data file. Section numbers follow the
-  Income-tax Act, 2025 (Chapter VIII, sections 122-154), with the earlier 1961 numbers for the toggle.
-- `src/lib/money.js` — all maths: daily number, spend split, overspend, SIP projection, inflation,
-  credit band. Pure functions, no React.
-- `src/lib/server-fns.js` — the two server functions behind the forms, with validation, honeypot,
-  duplicate and rate checks, database writes and confirmation email.
-- `base44/entities/` — `WaitlistSignup` and `PilotRequest` schemas and access rules.
-- `tests/money.test.mjs` — unit tests for the calculator and SIP maths.
+- `src/config/site.js` — every editable detail: contact email, socials, grievance officer details, tool descriptions, FAQ, pricing
+- `src/data/tax-deductions.js` — comprehensive tax guide with all deductions under Income-tax Act 2025
+- `src/lib/money.js` — all maths: daily number, spend split, SIP projection, inflation, credit band estimation
+- `src/lib/server-fns.js` — server functions behind waitlist, pilot, and booking forms with validation and emails
+- `base44/entities/` — database schemas: User, WaitlistSignup, PilotRequest, Expense, Budget, Goals, etc.
+- `tests/money.test.mjs` — 20 unit tests for calculator and SIP maths
+
+## Stack Summary
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 19, TanStack Router, Tailwind CSS, shadcn/ui |
+| Runtime | Base44 TanStack Start (Cloudflare Worker) |
+| Database | Base44 entities with Row-Level Security (RLS) |
+| Auth | Base44 auth (Google SSO, email/password, MFA) |
+| Email | Base44 SendEmail integration |
+| Deploy | Base44 editor 'Publish' or GitHub Actions → GitHub Pages |
 
 ## Run the tests
 
@@ -41,11 +58,19 @@ node tests/money.test.mjs
 
 ## Deployment
 
+### Base44 (primary live host)
 1. Publish the app from the Base44 editor (Publish button, top right).
 2. Set the real domain in `src/config/site.js` (`site.url`) before publishing, so the canonical URL,
    Open Graph URL, `sitemap.xml` and `robots.txt` all point at it.
-3. Replace the TODO placeholders in `src/config/site.js`: contact email, social links, and the
-   Grievance Officer's name, email and address. These are legally required details, not decoration.
+3. Verify the contact email, social links, and Grievance Officer details in `src/config/site.js`.
+   These are legally required: Grievance Officer must be registered with the Ministry of Electronics and IT (MeitY).
+
+### GitHub Pages (optional static mirror)
+A GitHub Actions workflow (`.github/workflows/static.yml`) builds and deploys the client bundle
+to GitHub Pages. The app's dynamic parts (databases, APIs, auth) remain on Base44.
+- Triggers on push to `main` branch
+- Serves the built `dist/client/` folder
+- Ensure `site.url` in `src/config/site.js` matches your GitHub Pages custom domain if set.
 
 ## Email and mobile signups
 
@@ -69,10 +94,12 @@ sending domain. If a send fails the signup is still stored, so nothing is lost.
   admins; updates and deletes are admin-only. The forms write through the server function, so the
   database never accepts anonymous reads.
 
-## Before launch
+## Pre-launch checklist
 
-- [ ] Real contact email and social links in `src/config/site.js`
-- [ ] Real Grievance Officer details
-- [ ] Real domain in `site.url`
-- [ ] Re-verify every tax limit and section number against incometax.gov.in
-- [ ] Re-verify pricing and the "as of" dates
+- [x] Contact email, social links, and Grievance Officer details verified in `src/config/site.js`
+- [ ] Set real domain in `site.url` for production (`https://brokenomore.in` or YOURDOMAIN.com)
+- [ ] Re-verify tax limits and section numbers against incometax.gov.in before filing season
+- [ ] Set up Base44 secrets (email sending, if any custom tokens needed)
+- [ ] Configure Google Analytics or other analytics in Base44 dashboard
+- [ ] Test waitlist and pilot forms end-to-end after publish
+- [ ] Verify `/robots.txt` and `/sitemap.xml` are accessible after publish
