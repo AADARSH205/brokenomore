@@ -1,21 +1,50 @@
 -- ==============================================================================
--- BrokeNoMore: Seed 15+ Realistic Expenses per User for ALL Users
+-- BrokeNoMore: Seed 15+ Realistic Expenses per User for ALL Users in Supabase
 -- Run this in Supabase SQL Editor:
 -- https://supabase.com/dashboard/project/uqnqqzldwhybdsaceafq/sql/new
---
--- This script:
--- 1. Iterates over ALL users currently in auth.users (including your account)
--- 2. Seeds 15 realistic categorized expenses for November 2026
--- 3. Seeds 5 comparison expenses for October 2026 (for Month-over-Month comparison)
--- 4. Ensures public.profiles has realistic salary/budget numbers
 -- ==============================================================================
 
+-- 1. Ensure public.expenses table exists
+CREATE TABLE IF NOT EXISTS public.expenses (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  amount numeric NOT NULL,
+  category text NOT NULL,
+  description text DEFAULT '',
+  payment_method text DEFAULT 'UPI',
+  date date DEFAULT current_date NOT NULL,
+  created_at timestamptz DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 2. Ensure RLS is enabled and policies exist
+ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own expenses" ON public.expenses;
+CREATE POLICY "Users can view own expenses"
+  ON public.expenses FOR SELECT
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can insert own expenses" ON public.expenses;
+CREATE POLICY "Users can insert own expenses"
+  ON public.expenses FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can update own expenses" ON public.expenses;
+CREATE POLICY "Users can update own expenses"
+  ON public.expenses FOR UPDATE
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can delete own expenses" ON public.expenses;
+CREATE POLICY "Users can delete own expenses"
+  ON public.expenses FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- 3. Loop and seed expenses for EVERY user
 DO $$
 DECLARE
   u RECORD;
-  exp_count INTEGER := 0;
 BEGIN
-  -- 1. Ensure all users in auth.users have a valid profile with salary
+  -- Ensure all users have active profiles
   INSERT INTO public.profiles (id, email, full_name, salary, salary_day, fixed_bills, savings_goal, daily_safe_spend)
   SELECT 
     id,
@@ -33,7 +62,6 @@ BEGIN
     savings_goal = CASE WHEN public.profiles.savings_goal IS NULL OR public.profiles.savings_goal = 0 THEN 15000 ELSE public.profiles.savings_goal END,
     daily_safe_spend = CASE WHEN public.profiles.daily_safe_spend IS NULL OR public.profiles.daily_safe_spend = 0 THEN 1000 ELSE public.profiles.daily_safe_spend END;
 
-  -- 2. Loop over EVERY user in auth.users and insert 15-20 expenses
   FOR u IN SELECT id FROM auth.users LOOP
     
     -- November 2026 Expenses (Current Month)
@@ -49,13 +77,13 @@ BEGIN
       (u.id, 'food', 'Zomato Hyderabadi Biryani Feast', 620, 'upi', '2026-11-13', '2026-11-13 13:45:00+00'),
       (u.id, 'bills', 'Airtel Xstream Fiber Broadband', 943, 'autopay', '2026-11-12', '2026-11-12 05:00:00+00'),
       (u.id, 'entertainment', 'PVR IMAX Tickets & Cheese Popcorn', 880, 'upi', '2026-11-10', '2026-11-10 19:00:00+00'),
-      (u.id, 'medical', 'Apollo Pharmacy Multivitamins & Paracetamol', 420, 'upi', '2026-11-08', '2026-11-08 11:20:00+00'),
-      (u.id, 'transport', 'Delhi/Bangalore Metro Card Recharge', 500, 'upi', '2026-11-06', '2026-11-06 08:50:00+00'),
+      (u.id, 'medical', 'Apollo Pharmacy Multivitamins', 420, 'upi', '2026-11-08', '2026-11-08 11:20:00+00'),
+      (u.id, 'transport', 'Metro Smart Card Recharge', 500, 'upi', '2026-11-06', '2026-11-06 08:50:00+00'),
       (u.id, 'groceries', 'Zepto Weekly Fresh Fruits & Veggies', 950, 'upi', '2026-11-04', '2026-11-04 18:25:00+00'),
-      (u.id, 'entertainment', 'Cult.fit Monthly Gym & Fitness Pass', 1999, 'card', '2026-11-02', '2026-11-02 07:00:00+00'),
+      (u.id, 'entertainment', 'Cult.fit Monthly Gym Pass', 1999, 'card', '2026-11-02', '2026-11-02 07:00:00+00'),
       (u.id, 'rent', 'Shared Apartment Monthly Rent', 14500, 'netbanking', '2026-11-01', '2026-11-01 10:00:00+00');
 
-    -- October 2026 Expenses (Previous Month for MoM comparison)
+    -- October 2026 Expenses (for Month-over-Month Comparison)
     INSERT INTO public.expenses (user_id, category, description, amount, payment_method, date, created_at)
     VALUES
       (u.id, 'rent', 'Shared Apartment Monthly Rent', 14500, 'netbanking', '2026-10-01', '2026-10-01 10:00:00+00'),
@@ -67,9 +95,9 @@ BEGIN
   END LOOP;
 END $$;
 
--- 3. Verification Summary:
+-- 4. Verification Query
 SELECT 
-  count(*) AS total_expenses,
+  count(*) AS total_expenses_seeded,
   count(DISTINCT user_id) AS total_users_with_expenses,
   round(avg(amount)) AS avg_expense_amount
 FROM public.expenses;

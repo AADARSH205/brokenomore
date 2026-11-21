@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { addMonths, monthKeyOf } from "@/lib/finance";
-import { isSupabaseConfigured, supabase, supabaseGetUser } from "@/lib/supabase";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/AuthContext";
 
 // Universal polyfill so legacy calls to globalThis.__B44_DB__ never throw
 if (typeof globalThis !== "undefined") {
@@ -39,6 +40,30 @@ function setStorage(key, val) {
   }
 }
 
+export const DEFAULT_EXPENSES = [
+  { id: "seed_1", category: "food", description: "Swiggy Gourmet Dinner & Desserts", amount: 540, payment_method: "upi", date: "2026-11-20" },
+  { id: "seed_2", category: "groceries", description: "Blinkit Quick Essentials & Milk", amount: 680, payment_method: "upi", date: "2026-11-19" },
+  { id: "seed_3", category: "transport", description: "Uber Auto to Office", amount: 185, payment_method: "upi", date: "2026-11-18" },
+  { id: "seed_4", category: "food", description: "Blue Tokai Cold Brew & Croissant", amount: 340, payment_method: "card", date: "2026-11-17" },
+  { id: "seed_5", category: "subscriptions", description: "Netflix & Spotify Premium Family", amount: 649, payment_method: "card", date: "2026-11-16" },
+  { id: "seed_6", category: "shopping", description: "Myntra Casual Weekend Wear", amount: 1899, payment_method: "card", date: "2026-11-15" },
+  { id: "seed_7", category: "food", description: "Tapri Chai & Samosa with team", amount: 90, payment_method: "upi", date: "2026-11-14" },
+  { id: "seed_8", category: "food", description: "Zomato Hyderabadi Biryani Feast", amount: 620, payment_method: "upi", date: "2026-11-13" },
+  { id: "seed_9", category: "bills", description: "Airtel Xstream Fiber Broadband", amount: 943, payment_method: "autopay", date: "2026-11-12" },
+  { id: "seed_10", category: "entertainment", description: "PVR IMAX Tickets & Cheese Popcorn", amount: 880, payment_method: "upi", date: "2026-11-10" },
+  { id: "seed_11", category: "medical", description: "Apollo Pharmacy Multivitamins", amount: 420, payment_method: "upi", date: "2026-11-08" },
+  { id: "seed_12", category: "transport", description: "Metro Smart Card Recharge", amount: 500, payment_method: "upi", date: "2026-11-06" },
+  { id: "seed_13", category: "groceries", description: "Zepto Weekly Fresh Fruits & Veggies", amount: 950, payment_method: "upi", date: "2026-11-04" },
+  { id: "seed_14", category: "entertainment", description: "Cult.fit Monthly Gym Pass", amount: 1999, payment_method: "card", date: "2026-11-02" },
+  { id: "seed_15", category: "rent", description: "Shared Apartment Monthly Rent", amount: 14500, payment_method: "netbanking", date: "2026-11-01" },
+  // October 2026 (for previous month comparison)
+  { id: "seed_16", category: "rent", description: "Shared Apartment Monthly Rent", amount: 14500, payment_method: "netbanking", date: "2026-10-01" },
+  { id: "seed_17", category: "bills", description: "Electricity & Wi-Fi Bill", amount: 1920, payment_method: "autopay", date: "2026-10-10" },
+  { id: "seed_18", category: "food", description: "Dining Out & Food Deliveries", amount: 6400, payment_method: "upi", date: "2026-10-15" },
+  { id: "seed_19", category: "shopping", description: "Diwali Festive Shopping & Gifts", amount: 4800, payment_method: "card", date: "2026-10-22" },
+  { id: "seed_20", category: "transport", description: "Fuel & Commute", amount: 2600, payment_method: "upi", date: "2026-10-28" },
+];
+
 const ALL = ["profile", "expenses", "budgets", "bills", "payments", "goals", "sips", "taxProfile"];
 
 const EMPTY = {
@@ -57,6 +82,7 @@ const EMPTY = {
  * Backed by Supabase (profiles, expenses, savings_goals) + LocalStorage (budgets, bills, sips).
  */
 export default function useFinanceData(month = monthKeyOf(new Date()), scope = ALL) {
+  const { user, isLoadingAuth } = useAuth();
   const scopeKey = scope.join(",");
   const [state, setState] = useState({
     ...EMPTY,
@@ -67,21 +93,14 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
   });
 
   const load = useCallback(async () => {
+    if (isLoadingAuth) return;
+
     setState((current) => ({ ...current, loading: true, error: null }));
     const prevMonth = addMonths(month, -1);
     const wanted = scopeKey.split(",");
     const wants = (key) => wanted.includes(key);
 
     try {
-      let user = null;
-      if (isSupabaseConfigured) {
-        try {
-          user = await supabaseGetUser();
-        } catch (e) {
-          console.warn("Could not fetch Supabase user", e);
-        }
-      }
-
       const uid = user?.id || "guest";
       const localPrefix = `brokenomore_${uid}_`;
 
@@ -96,10 +115,10 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
               .eq("id", user.id)
               .maybeSingle();
 
-            if (p && !pErr) {
-              const salary = Number(p.salary) || Number(p.monthly_income) || 0;
-              const fixedBills = Number(p.fixed_bills) || 0;
-              const savingsGoal = Number(p.savings_goal) || Number(p.monthly_savings_target) || 0;
+            if (p && !pErr && (Number(p.salary) > 0 || Number(p.monthly_income) > 0)) {
+              const salary = Number(p.salary) || Number(p.monthly_income) || 65000;
+              const fixedBills = Number(p.fixed_bills) || 20000;
+              const savingsGoal = Number(p.savings_goal) || Number(p.monthly_savings_target) || 15000;
               const buffer = Number(p.safety_buffer) || 5000;
               const daily = Number(p.daily_safe_spend) || Math.max(0, Math.round((salary - fixedBills - savingsGoal) / 30));
 
@@ -107,8 +126,8 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
                 id: p.id,
                 user_id: p.id,
                 email: p.email || user.email,
-                display_name: p.full_name || user.email?.split("@")[0] || "User",
-                full_name: p.full_name,
+                display_name: p.full_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "Aadarsh Patil",
+                full_name: p.full_name || user.user_metadata?.full_name || "Aadarsh Patil",
                 monthly_income: salary,
                 salary,
                 salary_day: Number(p.salary_day) || 1,
@@ -118,7 +137,7 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
                 safety_buffer: buffer,
                 extra_income: Number(p.extra_income) || 0,
                 daily_safe_spend: daily,
-                onboarded: salary > 0,
+                onboarded: true,
               };
               setStorage(`${localPrefix}profile`, profile);
             }
@@ -126,8 +145,43 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
             console.warn("Error loading profile from Supabase", err);
           }
         }
+
         if (!profile) {
           profile = getStorage(`${localPrefix}profile`, null);
+        }
+
+        // If still no profile, provide realistic default profile
+        if (!profile) {
+          profile = {
+            id: uid,
+            user_id: uid,
+            email: user?.email || "user@brokenomore.in",
+            display_name: user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Aadarsh Patil",
+            full_name: user?.user_metadata?.full_name || "Aadarsh Patil",
+            monthly_income: 65000,
+            salary: 65000,
+            salary_day: 1,
+            fixed_bills: 20000,
+            monthly_savings_target: 15000,
+            savings_goal: 15000,
+            safety_buffer: 5000,
+            extra_income: 0,
+            daily_safe_spend: 1000,
+            onboarded: true,
+          };
+          setStorage(`${localPrefix}profile`, profile);
+          if (isSupabaseConfigured && user?.id && supabase) {
+            supabase.from("profiles").upsert({
+              id: user.id,
+              email: user.email,
+              full_name: profile.full_name,
+              salary: profile.salary,
+              salary_day: profile.salary_day,
+              fixed_bills: profile.fixed_bills,
+              savings_goal: profile.savings_goal,
+              daily_safe_spend: profile.daily_safe_spend,
+            }).then(() => {}).catch(() => {});
+          }
         }
       }
 
@@ -143,7 +197,7 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
               .eq("user_id", user.id)
               .order("date", { ascending: false });
 
-            if (exps && !exErr) {
+            if (exps && !exErr && exps.length > 0) {
               remoteExpenses = exps.map((e) => ({
                 id: e.id,
                 amount: Number(e.amount),
@@ -159,6 +213,7 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
             console.warn("Error loading expenses from Supabase", err);
           }
         }
+
         const localExpenses = getStorage(`${localPrefix}expenses`, []);
         const seen = new Set();
         expenses = [...remoteExpenses, ...localExpenses].filter((e) => {
@@ -166,6 +221,34 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
           seen.add(e.id);
           return true;
         });
+
+        // If user has 0 expenses, auto-seed default expenses so dashboard is never empty!
+        if (expenses.length === 0) {
+          const autoSeeded = DEFAULT_EXPENSES.map((e) => ({
+            ...e,
+            id: `seed_${uid}_${e.id}`,
+            user_id: uid,
+          }));
+          expenses = autoSeeded;
+          setStorage(`${localPrefix}expenses`, autoSeeded);
+
+          // Also persist into Supabase table in background
+          if (isSupabaseConfigured && user?.id && supabase) {
+            const rowsToInsert = autoSeeded.map((e) => ({
+              user_id: user.id,
+              amount: e.amount,
+              category: e.category,
+              description: e.description,
+              payment_method: e.payment_method,
+              date: e.date,
+            }));
+            supabase
+              .from("expenses")
+              .insert(rowsToInsert)
+              .then(() => {})
+              .catch((err) => console.warn("Auto-seed to Supabase error:", err));
+          }
+        }
       }
 
       // 3. Savings Goals
@@ -180,7 +263,7 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
               .eq("user_id", user.id)
               .order("created_at", { ascending: false });
 
-            if (gData && !gErr) {
+            if (gData && !gErr && gData.length > 0) {
               remoteGoals = gData.map((g) => ({
                 id: g.id,
                 name: g.title || g.name || "Goal",
@@ -196,6 +279,7 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
             console.warn("Error loading goals from Supabase", err);
           }
         }
+
         const localGoals = getStorage(`${localPrefix}goals`, []);
         const seen = new Set();
         goals = [...remoteGoals, ...localGoals].filter((g) => {
@@ -203,37 +287,53 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
           seen.add(g.id);
           return true;
         });
+
+        if (goals.length === 0) {
+          const defaultGoals = [
+            { id: `goal_${uid}_1`, name: "Emergency Fund (3 months)", title: "Emergency Fund", kind: "emergency", category: "emergency", target_amount: 100000, saved_amount: 45000, target_date: "2027-03-31" },
+            { id: `goal_${uid}_2`, name: "Goa Vacation with Friends", title: "Goa Vacation", kind: "vacation", category: "vacation", target_amount: 25000, saved_amount: 18000, target_date: "2026-12-25" },
+          ];
+          goals = defaultGoals;
+          setStorage(`${localPrefix}goals`, defaultGoals);
+        }
       }
 
       // 4. Budgets
-      let budgets = [];
-      if (wants("budgets")) {
-        budgets = getStorage(`${localPrefix}budgets`, []);
-      }
+      let budgets = getStorage(`${localPrefix}budgets`, [
+        { id: `${month}_food`, month, category: "food", limit_amount: 8000 },
+        { id: `${month}_groceries`, month, category: "groceries", limit_amount: 6000 },
+        { id: `${month}_transport`, month, category: "transport", limit_amount: 3000 },
+        { id: `${month}_shopping`, month, category: "shopping", limit_amount: 5000 },
+        { id: `${month}_entertainment`, month, category: "entertainment", limit_amount: 4000 },
+      ]);
 
       // 5. Recurring Bills
-      let bills = [];
-      if (wants("bills")) {
-        bills = getStorage(`${localPrefix}bills`, []);
-      }
+      let bills = getStorage(`${localPrefix}bills`, [
+        { id: `bill_${uid}_1`, name: "House Rent", amount: 14500, category: "rent", due_day: 1, is_essential: true, active: true },
+        { id: `bill_${uid}_2`, name: "Airtel Wi-Fi Broadband", amount: 943, category: "bills", due_day: 12, is_essential: true, active: true },
+        { id: `bill_${uid}_3`, name: "Netflix & Spotify Premium", amount: 649, category: "subscriptions", due_day: 16, is_essential: false, active: true },
+        { id: `bill_${uid}_4`, name: "Cult.fit Monthly Membership", amount: 1999, category: "entertainment", due_day: 2, is_essential: false, active: true },
+      ]);
 
       // 6. Bill Payments
-      let payments = [];
-      if (wants("payments")) {
-        payments = getStorage(`${localPrefix}payments`, []);
-      }
+      let payments = getStorage(`${localPrefix}payments`, [
+        { id: `pay_${uid}_1`, bill_id: `bill_${uid}_1`, month, paid_on: `${month}-01`, amount: 14500 },
+        { id: `pay_${uid}_2`, bill_id: `bill_${uid}_4`, month, paid_on: `${month}-02`, amount: 1999 },
+      ]);
 
       // 7. SIPs
-      let sips = [];
-      if (wants("sips")) {
-        sips = getStorage(`${localPrefix}sips`, []);
-      }
+      let sips = getStorage(`${localPrefix}sips`, [
+        { id: `sip_${uid}_1`, fund_name: "Parag Parikh Flexi Cap Fund", monthly_amount: 5000, start_date: "2025-01-05", sip_day: 5, goal: "Wealth Creation", duration_years: 10, status: "active" },
+        { id: `sip_${uid}_2`, fund_name: "Nifty 50 Index Direct Growth", monthly_amount: 5000, start_date: "2025-01-05", sip_day: 5, goal: "Retirement", duration_years: 15, status: "active" },
+      ]);
 
       // 8. Tax Profile
-      let taxProfile = null;
-      if (wants("taxProfile")) {
-        taxProfile = getStorage(`${localPrefix}taxProfile`, null);
-      }
+      let taxProfile = getStorage(`${localPrefix}taxProfile`, {
+        id: `tax_${uid}`,
+        financial_year: "2026-27",
+        gross_salary: 850000,
+        regime: "new",
+      });
 
       setState({
         profile,
@@ -259,7 +359,7 @@ export default function useFinanceData(month = monthKeyOf(new Date()), scope = A
         prevMonth,
       }));
     }
-  }, [month, scopeKey]);
+  }, [month, scopeKey, user?.id, isLoadingAuth]);
 
   useEffect(() => {
     load();

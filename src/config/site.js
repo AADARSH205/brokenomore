@@ -14,7 +14,7 @@ export const site = {
     { label: "X", href: "https://x.com/brokenomore" },
   ],
   grievance: {
-    officerName: "Nikhil Sharma",
+    officerName: "User",
     officerEmail: "grievance@brokenomore.in",
     address: "BrokeNoMore Technologies, Indiranagar, Bengaluru, Karnataka 560038, India",
     responseDays: 15,

@@ -38,10 +38,10 @@ export default function FounderNote() {
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-border/80 pt-6">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary font-display font-bold text-primary-foreground">
-                N
+                U
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">Nikhil</p>
+                <p className="text-sm font-semibold text-foreground">User</p>
                 <p className="text-xs text-muted-foreground">Founder, BrokeNoMore</p>
               </div>
             </div>
