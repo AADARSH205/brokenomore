@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { fileURLToPath, URL } from "node:url";
 
 import base44 from "@base44/vite-plugin";
 import { cloudflare } from "@cloudflare/vite-plugin";
@@ -24,9 +25,12 @@ const BROWSER_PREBUNDLE = [
   "seroval", "seroval-plugins/web", "cookie-es",
 ];
 
-const isVercel = Boolean(process.env.VERCEL);
-
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
   optimizeDeps: { include: [...PREBUNDLE, ...BROWSER_PREBUNDLE] },
   environments: {
     ssr: {
@@ -37,16 +41,15 @@ export default defineConfig({
     },
   },
   plugins: [
-    !isVercel &&
-      base44({
-        hmrNotifier: true,
-        navigationNotifier: true,
-        analyticsTracker: true,
-        visualEditAgent: true,
-      }),
+    base44({
+      hmrNotifier: true,
+      navigationNotifier: true,
+      analyticsTracker: true,
+      visualEditAgent: true,
+    }),
     // No inspector: a restarted dev server would race the old one for port 9229 and crash.
-    !isVercel && cloudflare({ viteEnvironment: { name: "ssr" }, inspectorPort: false }),
+    cloudflare({ viteEnvironment: { name: "ssr" }, inspectorPort: false }),
     tanstackStart({ srcDirectory: "src" }),
     react(),
-  ].filter(Boolean),
+  ],
 });
