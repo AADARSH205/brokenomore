@@ -27,6 +27,7 @@ export default function HraCalculator({ className = "" }) {
       hraReceived: hraNum,
       rentPaid: rentNum,
       metro,
+      caps: { hraMetro: 0.5, hraNonMetro: 0.4, hraBasicShare: 0.1 },
     });
   }, [basicNum, hraNum, rentNum, metro]);
 

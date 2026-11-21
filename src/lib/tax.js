@@ -28,13 +28,22 @@ export function surchargeRate(taxable, bands = []) {
 }
 
 /** HRA exemption: the least of the three tests in section 10(13A). */
-export function hraExemption({ hraReceived, rentPaid, basic, metro, caps }) {
+export function hraExemption({
+  hraReceived,
+  rentPaid,
+  basic,
+  metro,
+  caps = { hraMetro: 0.5, hraNonMetro: 0.4, hraBasicShare: 0.1 },
+}) {
   const received = num(hraReceived);
   const rent = num(rentPaid);
   const base = num(basic);
   if (received === 0 || rent === 0) return 0;
-  const share = metro ? caps.hraMetro : caps.hraNonMetro;
-  return round(Math.max(0, Math.min(received, rent - base * caps.hraBasicShare, base * share)));
+  const metroShare = caps?.hraMetro ?? 0.5;
+  const nonMetroShare = caps?.hraNonMetro ?? 0.4;
+  const basicShare = caps?.hraBasicShare ?? 0.1;
+  const share = metro ? metroShare : nonMetroShare;
+  return round(Math.max(0, Math.min(received, rent - base * basicShare, base * share)));
 }
 
 /**
