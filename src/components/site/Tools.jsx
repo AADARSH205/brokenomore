@@ -1,7 +1,7 @@
 const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ list:async()=>[], filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } }, analytics: { track: () => {} } };
 
+import { useState } from "react";
 import { ReceiptText, TrendingUp, CreditCard } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { site } from "@/config/site";
 import InteractiveTaxCalculator from "@/components/tax/InteractiveTaxCalculator";
@@ -15,6 +15,8 @@ const TABS = [
 ];
 
 export default function Tools() {
+  const [activeTab, setActiveTab] = useState("tax");
+
   return (
     <section id="tools" aria-labelledby="tools-heading" className="mx-auto max-w-6xl px-5 py-20 sm:py-24">
       <div className="max-w-2xl">
@@ -28,43 +30,48 @@ export default function Tools() {
         </p>
       </div>
 
-      <Tabs
-        defaultValue="tax"
-        className="mt-10"
-        onValueChange={(value) => {
-          try {
-            db?.analytics?.track?.({ eventName: "tool_tab", properties: { tab: value } });
-          } catch {}
-        }}
-      >
-        <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-full border border-border bg-card p-1.5 sm:w-auto">
+      <div className="mt-10">
+        <div
+          role="tablist"
+          aria-label="Free tools navigation"
+          className="inline-flex h-auto w-full flex-wrap justify-start gap-1 rounded-full border border-border bg-card p-1.5 sm:w-auto"
+        >
           {TABS.map((tab) => {
             const Icon = tab.icon;
+            const isActive = activeTab === tab.value;
             return (
-              <TabsTrigger
+              <button
                 key={tab.value}
-                value={tab.value}
-                className="gap-2 rounded-full px-4 py-2.5 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => {
+                  setActiveTab(tab.value);
+                  try {
+                    db?.analytics?.track?.({ eventName: "tool_tab", properties: { tab: tab.value } });
+                  } catch {
+                    /* ignore */
+                  }
+                }}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-all ${
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
                 {tab.label}
-              </TabsTrigger>
+              </button>
             );
           })}
-        </TabsList>
+        </div>
 
         <div className="mt-6 rounded-3xl border border-border bg-card/60 p-5 sm:p-8">
-          <TabsContent value="tax" className="mt-0">
-            <InteractiveTaxCalculator />
-          </TabsContent>
-          <TabsContent value="invest" className="mt-0">
-            <InvestTool />
-          </TabsContent>
-          <TabsContent value="credit" className="mt-0">
-            <CreditScoreTool />
-          </TabsContent>
+          {activeTab === "tax" && <InteractiveTaxCalculator />}
+          {activeTab === "invest" && <InvestTool />}
+          {activeTab === "credit" && <CreditScoreTool />}
         </div>
-      </Tabs>
+      </div>
     </section>
   );
 }

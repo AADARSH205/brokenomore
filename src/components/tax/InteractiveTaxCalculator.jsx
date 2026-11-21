@@ -12,7 +12,6 @@ import {
   TrendingDown,
   Wallet,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import TaxGuide from "@/components/site/TaxGuide";
 import {
@@ -583,34 +582,60 @@ export default function InteractiveTaxCalculator() {
         </div>
       </div>
 
-      {/* 3. TABS: WHERE EACH RUPEE HELPS, IN-HAND ESTIMATOR, DEDUCTIONS GUIDE */}
-      <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-        <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-2xl border border-border bg-card p-1.5 sm:w-auto">
-          <TabsTrigger
-            value="breakdown"
-            className="gap-2 rounded-xl px-4 py-2 text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+      {/* 3. SUB-TABS: WHERE EACH RUPEE HELPS, IN-HAND ESTIMATOR, DEDUCTIONS GUIDE */}
+      <div className="w-full">
+        <div
+          role="tablist"
+          aria-label="Tax calculator sections"
+          className="inline-flex h-auto w-full flex-wrap justify-start gap-1 rounded-2xl border border-border bg-card p-1.5 sm:w-auto"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === "breakdown"}
+            onClick={() => setActiveSubTab("breakdown")}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium transition-all ${
+              activeSubTab === "breakdown"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
           >
             <Scale className="h-3.5 w-3.5" />
             Where Deductions Help
-          </TabsTrigger>
-          <TabsTrigger
-            value="inhand"
-            className="gap-2 rounded-xl px-4 py-2 text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === "inhand"}
+            onClick={() => setActiveSubTab("inhand")}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium transition-all ${
+              activeSubTab === "inhand"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
           >
             <Wallet className="h-3.5 w-3.5" />
             In-Hand Salary Estimator
-          </TabsTrigger>
-          <TabsTrigger
-            value="guide"
-            className="gap-2 rounded-xl px-4 py-2 text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === "guide"}
+            onClick={() => setActiveSubTab("guide")}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-medium transition-all ${
+              activeSubTab === "guide"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
           >
             <HelpCircle className="h-3.5 w-3.5" />
             All Deductions Guide
-          </TabsTrigger>
-        </TabsList>
+          </button>
+        </div>
 
         {/* TAB 1: WHERE EACH RUPEE OF DEDUCTIONS HELPS */}
-        <TabsContent value="breakdown" className="mt-4">
+        {activeSubTab === "breakdown" && (
+          <div className="mt-4">
           <div className="rounded-3xl border border-border bg-card p-6 shadow-soft sm:p-8">
             <h3 className="font-display text-lg font-bold tracking-tight text-foreground">
               Where each rupee of deductions helps
@@ -705,10 +730,12 @@ export default function InteractiveTaxCalculator() {
               </div>
             )}
           </div>
-        </TabsContent>
+        </div>
+        )}
 
         {/* TAB 2: IN-HAND SALARY ESTIMATOR (Required by Phase 2) */}
-        <TabsContent value="inhand" className="mt-4">
+        {activeSubTab === "inhand" && (
+          <div className="mt-4">
           <div className="rounded-3xl border border-border bg-card p-6 shadow-soft sm:p-8">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-4">
               <div>
@@ -787,15 +814,18 @@ export default function InteractiveTaxCalculator() {
               </div>
             </div>
           </div>
-        </TabsContent>
+        </div>
+        )}
 
         {/* TAB 3: EXISTING DEDUCTIONS GUIDE (Reference) */}
-        <TabsContent value="guide" className="mt-4">
-          <div className="rounded-3xl border border-border bg-card p-6 shadow-soft sm:p-8">
-            <TaxGuide />
+        {activeSubTab === "guide" && (
+          <div className="mt-4">
+            <div className="rounded-3xl border border-border bg-card p-6 shadow-soft sm:p-8">
+              <TaxGuide />
+            </div>
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
 
       {/* FOOTER DISCLAIMER (Required by Phase 2) */}
       <div className="rounded-2xl border border-border bg-secondary/40 p-4 text-xs leading-relaxed text-muted-foreground">

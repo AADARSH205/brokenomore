@@ -30,9 +30,10 @@ function InvestmentsPage() {
   const remove = useServerFn(deleteSip);
 
   const today = todayKey();
-  const totals = sipTotals(sips);
-  const invested = sips.reduce((sum, sip) => sum + sipInvested(sip, today), 0);
-  const upcoming = sips
+  const safeSips = sips || [];
+  const totals = sipTotals(safeSips);
+  const invested = safeSips.reduce((sum, sip) => sum + sipInvested(sip, today), 0);
+  const upcoming = safeSips
     .filter((sip) => sip.status !== "paused")
     .map((sip) => ({ sip, on: nextSipDate(sip, today) }))
     .sort((a, b) => (a.on < b.on ? -1 : 1))[0];

@@ -37,7 +37,9 @@ async function getUid() {
     try {
       const u = await supabaseGetUser();
       if (u?.id) return { id: u.id, email: u.email, user: u };
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }
   return { id: "guest", email: "", user: null };
 }
@@ -383,7 +385,9 @@ export const clearMyData = async () => {
     try {
       await supabase.from("expenses").delete().eq("user_id", uid);
       await supabase.from("savings_goals").delete().eq("user_id", uid);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }
   if (typeof window !== "undefined") {
     localStorage.removeItem(`brokenomore_${uid}_profile`);

@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, CheckSquare, Sparkles, TrendingUp } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowRight, BookOpen, CheckSquare, TrendingUp } from "lucide-react";
 import SipCalculator from "@/components/sip/SipCalculator";
 import BeforeSipChecklist from "@/components/sip/BeforeSipChecklist";
 import FirstSipGuide from "@/components/sip/FirstSipGuide";
+
+const SUB_TABS = [
+  { value: "calculator", label: "SIP Calculator & Reverse Mode", icon: TrendingUp },
+  { value: "checklist", label: "Before Your First SIP Checklist", icon: CheckSquare },
+  { value: "guide", label: "First SIP in 5 Steps Guide", icon: BookOpen },
+];
 
 export default function InvestTool() {
   const [activeTab, setActiveTab] = useState("calculator");
@@ -27,45 +32,41 @@ export default function InvestTool() {
         </Link>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-full border border-border bg-card p-1.5 sm:w-auto">
-          <TabsTrigger
-            value="calculator"
-            className="gap-2 rounded-full px-4 py-2 text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            <TrendingUp className="h-3.5 w-3.5" />
-            SIP Calculator & Reverse Mode
-          </TabsTrigger>
-          <TabsTrigger
-            value="checklist"
-            className="gap-2 rounded-full px-4 py-2 text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            <CheckSquare className="h-3.5 w-3.5" />
-            Before Your First SIP Checklist
-          </TabsTrigger>
-          <TabsTrigger
-            value="guide"
-            className="gap-2 rounded-full px-4 py-2 text-xs font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            <BookOpen className="h-3.5 w-3.5" />
-            First SIP in 5 Steps Guide
-          </TabsTrigger>
-        </TabsList>
+      <div className="w-full">
+        <div
+          role="tablist"
+          aria-label="SIP toolkit navigation"
+          className="inline-flex h-auto w-full flex-wrap justify-start gap-1 rounded-full border border-border bg-card p-1.5 sm:w-auto"
+        >
+          {SUB_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.value;
+            return (
+              <button
+                key={tab.value}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setActiveTab(tab.value)}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium transition-all ${
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
 
         <div className="mt-6">
-          <TabsContent value="calculator" className="mt-0">
-            <SipCalculator />
-          </TabsContent>
-
-          <TabsContent value="checklist" className="mt-0">
-            <BeforeSipChecklist isInteractive={true} monthlyExpenses={25000} />
-          </TabsContent>
-
-          <TabsContent value="guide" className="mt-0">
-            <FirstSipGuide />
-          </TabsContent>
+          {activeTab === "calculator" && <SipCalculator />}
+          {activeTab === "checklist" && <BeforeSipChecklist isInteractive={true} monthlyExpenses={25000} />}
+          {activeTab === "guide" && <FirstSipGuide />}
         </div>
-      </Tabs>
+      </div>
     </div>
   );
 }

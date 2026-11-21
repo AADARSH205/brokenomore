@@ -86,7 +86,7 @@ export default function Hero() {
                 search={{ returnTo: "/dashboard" }}
                 onClick={() => {
                   trackSignupStarted("hero");
-                  try { db?.analytics?.track?.({ eventName: "hero_cta_start_free" }); } catch {}
+                  try { db?.analytics?.track?.({ eventName: "hero_cta_start_free" }); } catch { /* ignore */ }
                 }}
                 className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-ink px-7 text-center text-[15px] font-medium text-cream shadow-md transition-colors hover:bg-ink/90"
               >
@@ -95,7 +95,7 @@ export default function Hero() {
               </Link>
               <a
                 href="#calculator"
-                onClick={() => { try { db?.analytics?.track?.({ eventName: "hero_cta_calculator" }); } catch {} }}
+                onClick={() => { try { db?.analytics?.track?.({ eventName: "hero_cta_calculator" }); } catch { /* ignore */ } }}
                 className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-ink px-7 text-[15px] font-medium text-ink transition-colors hover:bg-ink hover:text-cream"
               >
                 {t("hero_secondary_cta")}

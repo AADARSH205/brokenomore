@@ -108,7 +108,9 @@ export default function Calculator({ initialValues, onSync }) {
     }
     try {
       db?.analytics?.track?.({ eventName: "calculator_share" });
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   };
 
   return (

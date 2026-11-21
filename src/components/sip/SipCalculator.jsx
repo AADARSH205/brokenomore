@@ -43,31 +43,33 @@ export default function SipCalculator({ className = "" }) {
   // If in reverse mode, display chart using the calculated required monthly amount
   const activeProjection = useMemo(() => {
     if (isReverse) {
-      return sipProjection({
-        monthly: reverseResult.monthly,
-        years: Number(years) || 0,
-        annualRate: Number(rate) || 0,
-        stepUpPercent: Number(stepUp) || 0,
-      });
+      return (
+        sipProjection({
+          monthly: reverseResult?.monthly || 0,
+          years: Number(years) || 0,
+          annualRate: Number(rate) || 0,
+          stepUpPercent: Number(stepUp) || 0,
+        }) || { series: [], value: 0, invested: 0, gains: 0 }
+      );
     }
-    return forwardProjection;
-  }, [isReverse, reverseResult.monthly, forwardProjection, years, rate, stepUp]);
+    return forwardProjection || { series: [], value: 0, invested: 0, gains: 0 };
+  }, [isReverse, reverseResult?.monthly, forwardProjection, years, rate, stepUp]);
 
   // Adjust for inflation if toggled (6% inflation benchmark)
   const displayValue = adjustInflation
-    ? inflationAdjusted(activeProjection.value, Number(years) || 0, 6)
-    : activeProjection.value;
+    ? inflationAdjusted(activeProjection?.value || 0, Number(years) || 0, 6)
+    : (activeProjection?.value || 0);
 
-  const displayGains = Math.max(0, displayValue - activeProjection.invested);
+  const displayGains = Math.max(0, displayValue - (activeProjection?.invested || 0));
 
   // Chart data with inflation adjustment support
   const chartData = useMemo(() => {
-    return activeProjection.series.map((item) => ({
+    return (activeProjection?.series || []).map((item) => ({
       year: item.year,
       invested: item.invested,
       value: adjustInflation ? inflationAdjusted(item.value, item.year, 6) : item.value,
     }));
-  }, [activeProjection.series, adjustInflation]);
+  }, [activeProjection?.series, adjustInflation]);
 
   return (
     <div className={`rounded-3xl border border-border bg-card p-6 shadow-soft sm:p-8 ${className}`}>
@@ -308,8 +310,8 @@ export default function SipCalculator({ className = "" }) {
       </div>
 
       {/* GROWTH CHART */}
-      <div className="mt-6 h-60 w-full pt-2">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="mt-6 h-60 w-full min-h-[240px] pt-2">
+        <ResponsiveContainer width="100%" height="100%" minHeight={240}>
           <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="sipWealthGrad" x1="0" y1="0" x2="0" y2="1">
