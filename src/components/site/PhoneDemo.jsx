@@ -23,7 +23,7 @@ export default function PhoneDemo() {
   const add = (amount, label) => {
     if (!amount || amount <= 0) return;
     setSpent((value) => value + amount);
-    db.analytics.track({ eventName: "hero_demo_tap", properties: { chip: label } });
+    try { db?.analytics?.track?.({ eventName: "hero_demo_tap", properties: { chip: label } }); } catch {}
   };
 
   const addCustom = (event) => {

@@ -135,7 +135,7 @@ export default function Nav({ base = "" }) {
             href={`${base}#book`}
             onClick={() => {
               close();
-              db.analytics.track({ eventName: "nav_book_demo_click" });
+              try { db?.analytics?.track?.({ eventName: "nav_book_demo_click" }); } catch {}
             }}
             className="mt-2 flex w-full items-center justify-center px-4 py-2 text-xs font-medium text-muted-foreground underline underline-offset-2"
           >

@@ -44,7 +44,7 @@ export default function TaxGuide() {
             checked={showOld}
             onCheckedChange={(next) => {
               setShowOld(next);
-              db.analytics.track({ eventName: "tax_toggle_old_sections" });
+              try { db?.analytics?.track?.({ eventName: "tax_toggle_old_sections" }); } catch {}
             }}
           />
           <label htmlFor="old-sections" className="text-xs font-medium text-foreground">

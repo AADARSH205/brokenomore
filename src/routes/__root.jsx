@@ -8,6 +8,25 @@ import { Base44Scripts } from "base44:document";
 import { site } from "@/config/site";
 import appCss from "@/index.css?url";
 
+// Universal polyfill so legacy Base44 DB/analytics calls never throw on static hosting
+if (typeof globalThis !== "undefined") {
+  const entityMock = () => ({
+    list: async () => [],
+    filter: async () => [],
+    get: async () => null,
+    create: async (d) => ({ id: "mock_" + Date.now(), ...d }),
+    update: async (id, d) => ({ id, ...d }),
+    delete: async () => ({ ok: true }),
+    deleteMany: async () => ({ ok: true }),
+  });
+  globalThis.__B44_DB__ = globalThis.__B44_DB__ || {
+    auth: { isAuthenticated: async () => false, me: async () => null, hasToken: () => false },
+    entities: new Proxy({}, { get: () => entityMock() }),
+    integrations: { Core: { UploadFile: async () => ({ file_url: "" }), SendEmail: async () => ({}) } },
+    analytics: { track: () => {} },
+  };
+}
+
 const themeScript = `try{var t=localStorage.getItem("bnm-theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.classList.add("dark")}}catch(e){}`;
 const swScript = `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})};`;
 

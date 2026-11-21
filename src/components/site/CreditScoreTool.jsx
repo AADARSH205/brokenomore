@@ -49,7 +49,9 @@ export default function CreditScoreTool() {
                   value={answers[factor.key]}
                   onValueChange={(next) => {
                     setAnswers((current) => ({ ...current, [factor.key]: next }));
-                    db.analytics.track({ eventName: "credit_factor_change" });
+                    try {
+                      db?.analytics?.track?.({ eventName: "credit_factor_change" });
+                    } catch {}
                   }}
                 >
                   <SelectTrigger id={id} className="mt-1.5 h-11 w-full rounded-xl bg-card text-sm">

@@ -1,4 +1,4 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
+const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ list:async()=>[], filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } }, analytics: { track: () => {} } };
 
 import { ReceiptText, TrendingUp, CreditCard } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,7 +31,11 @@ export default function Tools() {
       <Tabs
         defaultValue="tax"
         className="mt-10"
-        onValueChange={(value) => db.analytics.track({ eventName: "tool_tab", properties: { tab: value } })}
+        onValueChange={(value) => {
+          try {
+            db?.analytics?.track?.({ eventName: "tool_tab", properties: { tab: value } });
+          } catch {}
+        }}
       >
         <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-full border border-border bg-card p-1.5 sm:w-auto">
           {TABS.map((tab) => {

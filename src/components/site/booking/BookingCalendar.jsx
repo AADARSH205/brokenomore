@@ -91,7 +91,7 @@ export default function BookingCalendar() {
 
       setStep("done");
       setStatus({ state: "idle", message: "" });
-      db.analytics.track({ eventName: "demo_booking_confirmed" });
+      try { db?.analytics?.track?.({ eventName: "demo_booking_confirmed" }); } catch {}
       refresh();
     } catch {
       setStatus({ state: "error", message: "Something went wrong on our side. Please try once more." });

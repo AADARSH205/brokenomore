@@ -40,7 +40,7 @@ export default function WaitlistForm({ source = "final-cta" }) {
               ? "You are on the list. Check your inbox for a confirmation."
               : "You are on the list. We will be in touch when the beta opens.",
       });
-      db.analytics.track({ eventName: "waitlist_submit", properties: { source } });
+      try { db?.analytics?.track?.({ eventName: "waitlist_submit", properties: { source } }); } catch {}
     } catch {
       setState({ status: "error", message: "Something went wrong on our side. Please try once more." });
     }

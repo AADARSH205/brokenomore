@@ -53,7 +53,7 @@ export default function PilotForm() {
             ? "We already have a request from that address. Someone will reply within two working days."
             : "Request received. A person will reply within two working days.",
       });
-      db.analytics.track({ eventName: "pilot_submit" });
+      try { db?.analytics?.track?.({ eventName: "pilot_submit" }); } catch {}
     } catch {
       setState({ status: "error", message: "Something went wrong on our side. Please try once more." });
     }

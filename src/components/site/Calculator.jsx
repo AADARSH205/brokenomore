@@ -106,7 +106,9 @@ export default function Calculator({ initialValues, onSync }) {
     } catch {
       toast("Copy this link to share", { description: url });
     }
-    db.analytics.track({ eventName: "calculator_share" });
+    try {
+      db?.analytics?.track?.({ eventName: "calculator_share" });
+    } catch {}
   };
 
   return (
