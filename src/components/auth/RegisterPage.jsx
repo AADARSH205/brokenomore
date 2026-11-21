@@ -13,6 +13,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { Label } from "@/components/ui/label";
 import { safeReturnTo } from "@/lib/authReturnTo";
 import { trackSignupCompleted, trackSignupStarted } from "@/lib/analytics";
+import { isSupabaseConfigured, supabaseSignUp } from "@/lib/supabase";
 
 const isAlreadyVerified = (err) => err?.status === 400 && /already verified/i.test(err?.message ?? "");
 
@@ -42,6 +43,18 @@ export function RegisterPage() {
     setBusy(true);
     trackSignupStarted("register_page");
     try {
+      if (isSupabaseConfigured) {
+        const { user, session } = await supabaseSignUp(email, password);
+        trackSignupCompleted("supabase_email");
+        if (session) {
+          toast.success("Account created successfully!");
+          window.location.href = returnTo;
+        } else {
+          toast.success("Account created! Please check your email to confirm your account.");
+          window.location.href = `/login?returnTo=${encodeURIComponent(returnTo)}`;
+        }
+        return;
+      }
       await db.auth.register({ email, password });
       setStep("otp");
     } catch (err) {

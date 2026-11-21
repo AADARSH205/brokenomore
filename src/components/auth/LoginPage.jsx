@@ -8,6 +8,7 @@ import { MfaFlow } from "@/components/auth/MfaFlow";
 import { MfaScreen } from "@/components/auth/MfaParts";
 import { loginWithMfa } from "@/lib/authMfa";
 import { safeReturnTo } from "@/lib/authReturnTo";
+import { isSupabaseConfigured, supabaseSignIn } from "@/lib/supabase";
 
 // The /login page. ?returnTo= (or the platform's ?from_url=) is where the visitor
 // goes after signing in — the login gate and the MCP consent page send people here with it.
@@ -24,6 +25,11 @@ export function LoginPage() {
     setError("");
     setBusy(true);
     try {
+      if (isSupabaseConfigured) {
+        await supabaseSignIn(email, password);
+        window.location.href = returnTo;
+        return;
+      }
       const result = await loginWithMfa(email, password);
       if (result.mfa_required) {
         setMfaChallenge(result);

@@ -24,6 +24,8 @@ const BROWSER_PREBUNDLE = [
   "seroval", "seroval-plugins/web", "cookie-es",
 ];
 
+const isVercel = Boolean(process.env.VERCEL);
+
 export default defineConfig({
   optimizeDeps: { include: [...PREBUNDLE, ...BROWSER_PREBUNDLE] },
   environments: {
@@ -35,15 +37,16 @@ export default defineConfig({
     },
   },
   plugins: [
-    base44({
-      hmrNotifier: true,
-      navigationNotifier: true,
-      analyticsTracker: true,
-      visualEditAgent: true,
-    }),
+    !isVercel &&
+      base44({
+        hmrNotifier: true,
+        navigationNotifier: true,
+        analyticsTracker: true,
+        visualEditAgent: true,
+      }),
     // No inspector: a restarted dev server would race the old one for port 9229 and crash.
-    cloudflare({ viteEnvironment: { name: "ssr" }, inspectorPort: false }),
+    !isVercel && cloudflare({ viteEnvironment: { name: "ssr" }, inspectorPort: false }),
     tanstackStart({ srcDirectory: "src" }),
     react(),
-  ],
+  ].filter(Boolean),
 });
