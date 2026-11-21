@@ -35,21 +35,30 @@ export function SubmitButton({ busy, busyLabel, children, ...props }) {
 export function GoogleButton({ returnTo, onError }) {
   const handleGoogle = async () => {
     try {
-      if (isSupabaseConfigured && supabase) {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo: window.location.origin + (returnTo || "/dashboard"),
-          },
-        });
-        if (error) {
-          throw new Error("Google login is not enabled in Supabase yet. Please sign in with Email & Password below, or enable Google under Supabase -> Authentication -> Providers.");
-        }
-        return;
+      if (!isSupabaseConfigured || !supabase) {
+        throw new Error(
+          "Supabase keys are not set in Vercel. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel -> Project Settings -> Environment Variables, or use Email & Password below."
+        );
       }
-      await signInWithProvider("google", returnTo);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + (returnTo || "/dashboard"),
+        },
+      });
+      if (error) {
+        throw new Error(
+          "Google login is not enabled in your Supabase project yet. Please enable Google under Supabase -> Authentication -> Providers, or sign in with Email & Password below."
+        );
+      }
+      if (data?.url) {
+        window.location.href = data.url;
+      }
     } catch (err) {
-      onError(err.message || "Please use email & password to sign in.");
+      onError(
+        err.message ||
+          "Google login requires enabling the Google provider in your Supabase dashboard (Authentication -> Providers -> Google). In the meantime, you can sign in with Email & Password below."
+      );
     }
   };
 
